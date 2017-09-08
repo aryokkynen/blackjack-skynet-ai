@@ -21,30 +21,17 @@ public class Dealer {
 	}
 	
 	
-	public String check_hand (int hand)  {
+	public boolean check_hand (int hand)  {
 		
 		if (hand > 21) {
-			return "You lose";
+			return false;
 		}
-		
-		else if (hand == 21) {
-			return "BLACKJACK! You win!";
-		}
-		
 		else {
-			
-			return "Draw more or stay?";
+			return true;
 		}
 		
-	}
-	
-	public String stay_put(int hand){
 		
-		if (hand < 22) {
-			return "You win! Hand points: " + hand;
-		}
 		
-		return "You lose! Hand points: " + hand;
 	}
 	
 	public boolean check_for_blackjack(int hand){

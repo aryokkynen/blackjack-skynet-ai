@@ -20,12 +20,14 @@ public class App {
 
 			int player_hand;
 			int dealer_hand;
-			int card1 = d.Generate_random_card();
-			int card2 = d.Generate_random_card();
+			int player_card1 = d.Generate_random_card();
+			int dealer_card1 = d.Generate_random_card();
+			int player_card2 = d.Generate_random_card();
+			int dealer_card2 = d.Generate_random_card();
 			int player_starting_sum = 12;
 			
-			int dealer_card1 = d.Generate_random_card();
-			int dealer_card2 = d.Generate_random_card();
+			
+			
 
 			int player_card_count = 2;
 			int dealer_card_count = 2;			
@@ -38,11 +40,11 @@ public class App {
 			boolean dealer_stay = false;
 			boolean dealer_bust = false;
 
-			player_hand = card1 + card2;
+			player_hand = player_card1 + player_card2;
 			dealer_hand = dealer_card1 + dealer_card2;
 			int player_starting_hand = player_hand;
 			
-			System.out.println("Player starting hand, player card{1} " + card1 + ", player card{2} " + card2 + " total: " + player_hand);
+			System.out.println("Player starting hand, player card{1} " + player_card1 + ", player card{2} " + player_card2 + " total: " + player_hand);
 			System.out.println("Dealer starting hand, dealer card{1} " + dealer_card1 + " , dealer card{2} " + dealer_card2 + " total: " + dealer_hand);
 			int tolerance = player_starting_sum  + (1 + (int) (Math.random() * 5));
 			

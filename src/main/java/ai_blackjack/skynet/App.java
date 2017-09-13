@@ -9,8 +9,8 @@ public class App {
 		DecimalFormat df = new DecimalFormat("####0.00");
 		long start = System.currentTimeMillis();
 		
-		int losses = 0;
-		int wins = 0;
+		int dealer_wins = 0;
+		int player_wins = 0;
 
 		int games = 5000;
 
@@ -18,81 +18,105 @@ public class App {
 
 			Dealer d = new Dealer();
 
-			int starting_hand;
-
+			int player_hand;
+			int dealer_hand;
 			int card1 = d.Generate_random_card();
 			int card2 = d.Generate_random_card();
-
-			int cardcount = 2;
+			int player_starting_sum = 12;
 			
-			boolean hand_status;
+			int dealer_card1 = d.Generate_random_card();
+			int dealer_card2 = d.Generate_random_card();
 
-			boolean win = false;
-			boolean stay = false;
-
-			starting_hand = card1 + card2;
-
-			System.out.println("Starting hand, card[1] " + card1 + " card[2] " + card2 + " total: " + starting_hand);
-
-			win = d.check_for_blackjack(starting_hand);
-
-			if (win) {
-				System.out.println("Blackjack!");
-			} else {
-				
-				//Randomly decide if we want new card
-				boolean coin = flip_coin();
-				
-				if (coin && !win) {
-					starting_hand = d.deal(starting_hand);
-					cardcount++;
-					System.out.println("RANDOMLY SELECTED TO DRAW MORE CARDS, CURRENT HAND" + starting_hand);
-					hand_status = d.check_hand(starting_hand);
-					if (!hand_status) {
-						System.out.println("YOU LOOSE");
-						win = false;
-					}
-					
-				} else  {
-					System.out.println("RANDOMLY SELECTED TO STAY");
-					hand_status = d.check_hand(starting_hand);
-					stay = true;
-					if (!hand_status) {
-						System.out.println("YOU LOOSE");
-						win = false;
-					}
-				}
-					
-			}
-
-			// Randomly decide if more cards are needed		
+			int player_card_count = 2;
+			int dealer_card_count = 2;			
 			
-			boolean coin = flip_coin();
+			boolean requirements = true;
+
+			boolean player_win = false;
+			boolean player_stay = false;
+			boolean player_bust = false;
 			
-			if (coin && !win && !stay) {
-				starting_hand = d.deal(starting_hand);
-				System.out.println("RANDOMLY SELECTED TO DRAW MORE CARDS, CURRENT HAND" + starting_hand);
-				cardcount++;
-				hand_status = d.check_hand(starting_hand);
-				if (!hand_status) {
-					System.out.println("YOU LOOSE");
-					win = false;
+			boolean dealer_win = false;
+			boolean dealer_stay = false;
+			boolean dealer_bust = false;
+
+			player_hand = card1 + card2;
+			dealer_hand = dealer_card1 + dealer_card2;
+			int player_starting_hand = player_hand;
+			
+			System.out.println("Player starting hand, card{1} " + card1 + " card{2} " + card2 + " total: " + player_hand);
+			System.out.println("Dealer starting hand, card{1} " + dealer_card1 + " dealer_card{2} " + dealer_card2 + " total: " + dealer_hand);
+			int tolerance = player_starting_sum  + (1 + (int) (Math.random() * 5));
+			
+			dealer_win = d.check_for_blackjack(dealer_hand);
+			
+
+
+			// Do stuff
+			do {
+				if (dealer_hand < 17) {
+					int dealer_draw = d.Generate_random_card();
+					dealer_hand = dealer_hand + dealer_draw;
+					dealer_win = d.check_for_blackjack(dealer_hand);
+					System.out.println("Dealer draw! " + dealer_draw);
+					dealer_card_count++;
 				}
 				
+				// check for dealer bust before continuing
+				dealer_bust = d.check_hand(dealer_hand);
+				if (!dealer_bust){
+					System.out.println("Dealer bust! Over 21. Dealer hand: " + dealer_hand );
+					break;
+				}
+				
+				if (player_hand < tolerance || player_starting_hand > tolerance || player_hand < dealer_hand){
+					int player_draw = d.Generate_random_card();
+					player_hand = dealer_hand + player_draw;
+					player_win = d.check_for_blackjack(player_hand);
+					System.out.println("Player draw! " + player_draw);
+					player_card_count++;
+				}
+				
+				// check for dealer bust before continuing
+				player_bust = d.check_hand(player_hand);
+				if (!player_bust){
+					System.out.println("Player bust! Over 21. Player hand: " + player_hand );
+					break;
+				}
+				
+				
+				if (player_hand >= tolerance && dealer_hand >= 16) {
+					break;
+				}
+						
 		
-			}	
+			} while (true); 
+			
+			
+			System.out.println("Random (player) tolerance: " + tolerance);
+			System.out.println("Player hand: " + player_hand);
+			System.out.println("Dealer hand: " + dealer_hand);			
 				
-			if (d.check_hand(starting_hand)) {				
-				win = true;
-				wins++;
-				System.out.println("Won " + starting_hand);
+			if (d.check_hand(player_hand) && !dealer_win) {		
+								
+				if (player_hand > dealer_hand){
+					player_win = true;
+					player_wins++;
+					System.out.println("Player won: " + player_hand);
+				} else {
+					player_win = false;
+					dealer_wins++;
+					System.out.println("Player lost: " + player_hand);
+				}
+				
 			} else {
-				win = false;
-				losses++;
-				System.out.println("Lost " + starting_hand);
+				player_win = false;
+				dealer_wins++;
+				System.out.println("Player lost: " + player_hand);
 			}
 
-			System.out.println("Cardcount: " + cardcount + "\n");
+			System.out.println("Player cardcount: " + player_card_count);
+			System.out.println("Dealer cardcount: " + dealer_card_count + "\n");
 		
 		
 		
@@ -107,10 +131,10 @@ public class App {
 		
 		long end = System.currentTimeMillis();
 		System.out.println("****************************************");
-		System.out.println("Wins: " + wins);
-		System.out.println("Losses: " + losses);
+		System.out.println("Player wins: " + player_wins);
+		System.out.println("Dealer wins: " + dealer_wins);
 		System.out.println("Total games: " + games);
-		System.out.println("Win " + df.format(100/((double)games / (double) wins)) + "%");
+		System.out.println("Player win " + df.format(100/((double)games / (double) player_wins)) + "%");
 		System.out.println("Execution time is " + df.format((end - start) / 1000d) + " seconds");
 		System.out.println("****************************************");
 		

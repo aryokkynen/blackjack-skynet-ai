@@ -30,8 +30,6 @@ public class App {
 			int player_card_count = 2;
 			int dealer_card_count = 2;			
 			
-			boolean requirements = true;
-
 			boolean player_win = false;
 			boolean player_stay = false;
 			boolean player_bust = false;
@@ -44,8 +42,8 @@ public class App {
 			dealer_hand = dealer_card1 + dealer_card2;
 			int player_starting_hand = player_hand;
 			
-			System.out.println("Player starting hand, card{1} " + card1 + " card{2} " + card2 + " total: " + player_hand);
-			System.out.println("Dealer starting hand, card{1} " + dealer_card1 + " dealer_card{2} " + dealer_card2 + " total: " + dealer_hand);
+			System.out.println("Player starting hand, player card{1} " + card1 + ", player card{2} " + card2 + " total: " + player_hand);
+			System.out.println("Dealer starting hand, dealer card{1} " + dealer_card1 + " , dealer card{2} " + dealer_card2 + " total: " + dealer_hand);
 			int tolerance = player_starting_sum  + (1 + (int) (Math.random() * 5));
 			
 			dealer_win = d.check_for_blackjack(dealer_hand);
@@ -60,6 +58,10 @@ public class App {
 					dealer_win = d.check_for_blackjack(dealer_hand);
 					System.out.println("Dealer draw! " + dealer_draw);
 					dealer_card_count++;
+					if (dealer_win) {
+						System.out.println("Dealer blackjack!");
+						break;
+					}
 				}
 				
 				// check for dealer bust before continuing
@@ -75,6 +77,10 @@ public class App {
 					player_win = d.check_for_blackjack(player_hand);
 					System.out.println("Player draw! " + player_draw);
 					player_card_count++;
+					if (player_win) {
+						System.out.println("Player blackjack!");
+						break;
+					}
 				}
 				
 				// check for dealer bust before continuing
@@ -102,28 +108,22 @@ public class App {
 				if (player_hand > dealer_hand){
 					player_win = true;
 					player_wins++;
-					System.out.println("Player won: " + player_hand);
+					System.out.println("Player won: PH " + player_hand + " VS DH " + dealer_hand);
 				} else {
 					player_win = false;
 					dealer_wins++;
-					System.out.println("Player lost: " + player_hand);
+					System.out.println("Player lost: PH " + player_hand + " VS DH " + dealer_hand);
 				}
 				
 			} else {
 				player_win = false;
 				dealer_wins++;
-				System.out.println("Player lost: " + player_hand);
+				System.out.println("Player lost: PH " + player_hand + " VS DH " + dealer_hand);
 			}
 
 			System.out.println("Player cardcount: " + player_card_count);
 			System.out.println("Dealer cardcount: " + dealer_card_count + "\n");
-		
-		
-		
-		
-		
-		
-		
+
 		
 		//End FOR
 		}

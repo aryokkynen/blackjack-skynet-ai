@@ -13,11 +13,13 @@ public class App {
 		int player_wins = 0;
 
 		int games = 5000;
-
+		Dealer d = new Dealer();
+		d.Make_deck();
+		
 		for (int i = 0; i < games; i++) {
 
-			Dealer d = new Dealer();
-
+			
+			
 			int player_hand;
 			int dealer_hand;
 			int card1 = d.Generate_random_card();
@@ -60,6 +62,7 @@ public class App {
 					dealer_card_count++;
 					if (dealer_win) {
 						System.out.println("Dealer blackjack!");
+						d.Check_shuffle();
 						break;
 					}
 				}
@@ -68,6 +71,7 @@ public class App {
 				dealer_bust = d.check_hand(dealer_hand);
 				if (!dealer_bust){
 					System.out.println("Dealer bust! Over 21. Dealer hand: " + dealer_hand );
+					d.Check_shuffle();
 					break;
 				}
 				
@@ -79,6 +83,7 @@ public class App {
 					player_card_count++;
 					if (player_win) {
 						System.out.println("Player blackjack!");
+						d.Check_shuffle();
 						break;
 					}
 				}
@@ -87,11 +92,13 @@ public class App {
 				player_bust = d.check_hand(player_hand);
 				if (!player_bust){
 					System.out.println("Player bust! Over 21. Player hand: " + player_hand );
+					d.Check_shuffle();
 					break;
 				}
 				
 				
 				if (player_hand >= tolerance && dealer_hand >= 16) {
+					d.Check_shuffle();
 					break;
 				}
 						

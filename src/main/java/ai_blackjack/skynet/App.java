@@ -17,8 +17,6 @@ public class App {
 		d.Make_deck();
 		
 		for (int i = 0; i < games; i++) {
-
-			
 			
 			int player_hand;
 			int dealer_hand;
@@ -28,9 +26,6 @@ public class App {
 			int dealer_card2 = d.Generate_random_card();
 			int player_starting_sum = 12;
 			
-			
-			
-
 			int player_card_count = 2;
 			int dealer_card_count = 2;			
 			
@@ -51,14 +46,17 @@ public class App {
 			int tolerance = player_starting_sum  + (1 + (int) (Math.random() * 5));
 			
 			dealer_win = d.check_for_blackjack(dealer_hand);
-			
-
 
 			// Do stuff
 			do {
 				if (dealer_hand < 17) {
 					int dealer_draw = d.Generate_random_card();
 					dealer_hand = dealer_hand + dealer_draw;
+					if (dealer_hand == 1) {
+						if (dealer_hand <= 12) {
+							dealer_hand = 11;
+						}
+					}
 					dealer_win = d.check_for_blackjack(dealer_hand);
 					System.out.println("Dealer draw! " + dealer_draw);
 					dealer_card_count++;
@@ -79,7 +77,14 @@ public class App {
 				
 				if (player_hand < tolerance || player_starting_hand > tolerance || player_hand < dealer_hand){
 					int player_draw = d.Generate_random_card();
-					player_hand = dealer_hand + player_draw;
+					player_hand = player_hand + player_draw;
+					
+					//Determine if Ace should be used as "11"
+					if (player_draw == 1) {
+						if (player_hand <= 12) {
+							player_draw = 11;
+						}
+					}
 					player_win = d.check_for_blackjack(player_hand);
 					System.out.println("Player draw! " + player_draw);
 					player_card_count++;
@@ -98,16 +103,13 @@ public class App {
 					break;
 				}
 				
-				
 				if (player_hand >= tolerance && dealer_hand >= 16) {
 					d.Check_shuffle();
 					break;
 				}
 						
-		
 			} while (true); 
-			
-			
+					
 			System.out.println("Random (player) tolerance: " + tolerance);
 			System.out.println("Player hand: " + player_hand);
 			System.out.println("Dealer hand: " + dealer_hand);			
@@ -133,11 +135,9 @@ public class App {
 			System.out.println("Player cardcount: " + player_card_count);
 			System.out.println("Dealer cardcount: " + dealer_card_count + "\n");
 
-		
 		//End FOR
 		}
-		
-		
+			
 		long end = System.currentTimeMillis();
 		System.out.println("****************************************");
 		System.out.println("Player wins: " + player_wins);

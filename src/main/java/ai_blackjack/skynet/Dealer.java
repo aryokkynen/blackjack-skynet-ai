@@ -56,7 +56,7 @@ public class Dealer {
 	}
 
 	public void Shuffle_le_deck() {
-		System.out.println("Shuffling le deck. Bitches!");
+		//System.out.println("Shuffling le deck. Bitches!");
 		dealt = 0;
 		deckList.set(0, 4 * decks);
 		deckList.set(1, 4 * decks);

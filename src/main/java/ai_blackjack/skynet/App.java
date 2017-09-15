@@ -2,16 +2,19 @@ package ai_blackjack.skynet;
 
 import java.text.DecimalFormat;
 
+import me.tongfei.progressbar.ProgressBar;
+
 public class App {
 
 	public static void main(String[] args) {
 
 		/*
 		 * Rules: Decks in shoe = 4 (This can be changed from Dealer.java)
-		 * Player draws first, then dealer for starting hand, repeat two times. 
-		 * Create random game tolerance for player (Starting sum(Set to 12) + random(1-5)),
-		 * this is sum which player should not go over unless losing to dealer. 
-		 * This can be changed by modifying variable min/max tolerance
+		 * Player draws first, then dealer for starting hand, repeat two times.
+		 * Create random game tolerance for player (Starting sum(Set to 12) +
+		 * random(1-5)), this is sum which player should not go over unless
+		 * losing to dealer. This can be changed by modifying variable min/max
+		 * tolerance
 		 * 
 		 * Decks are shuffled after each game.
 		 * 
@@ -19,11 +22,14 @@ public class App {
 		 * check for dealer bust -> dealer draws -> check for blackjack for
 		 * dealer -> Repeat.
 		 */
-		
+
+
 		// CHANGEABLE VARIABLES
-		int min_tolerance = 1; 
+		int min_tolerance = 1;
 		int max_tolerance = 5;
 		int games = 500000;
+
+		ProgressBar pb = new ProgressBar("Simulating games", games).start();
 
 		DecimalFormat df = new DecimalFormat("####0.00");
 		long start = System.currentTimeMillis();
@@ -33,10 +39,13 @@ public class App {
 
 		Dealer d = new Dealer();
 		d.Make_deck();
-
+		
+		
 		for (int i = 0; i < games; i++) {
+			
+			pb.step();
 
-			System.out.println("*** SIMULATING GAME " + (i + 1) + " ***");
+			// System.out.println("*** SIMULATING GAME " + (i + 1) + " ***");
 			int player_hand;
 			int dealer_hand;
 			int player_card1 = d.Generate_random_card();
@@ -60,14 +69,17 @@ public class App {
 			dealer_hand = dealer_card1 + dealer_card2;
 			int player_starting_hand = player_hand;
 
-			System.out.println("Player starting hand, player card{1} " + player_card1 + ", player card{2} "
-					+ player_card2 + " total: " + player_hand);
-			System.out.println("Dealer starting hand, dealer card{1} " + dealer_card1 + " , dealer card{2} "
-					+ dealer_card2 + " total: " + dealer_hand);
+			// System.out.println("Player starting hand, player card{1} " +
+			// player_card1 + ", player card{2} "
+			// + player_card2 + " total: " + player_hand);
+			// System.out.println("Dealer starting hand, dealer card{1} " +
+			// dealer_card1 + " , dealer card{2} "
+			// + dealer_card2 + " total: " + dealer_hand);
 			int tolerance = player_starting_sum + (min_tolerance + (int) (Math.random() * max_tolerance));
 
 			dealer_win = d.check_for_blackjack(dealer_hand);
-			System.out.println("Random (player) tolerance for round " + (i + 1 + " is ") + tolerance);
+			// System.out.println("Random (player) tolerance for round " + (i +
+			// 1 + " is ") + tolerance);
 			// Do stuff
 			do {
 
@@ -82,10 +94,10 @@ public class App {
 						}
 					}
 					player_win = d.check_for_blackjack(player_hand);
-					System.out.println("Player draw! " + player_draw);
+					// System.out.println("Player draw! " + player_draw);
 					player_card_count++;
 					if (player_win) {
-						System.out.println("Player blackjack!");
+						// System.out.println("Player blackjack!");
 						d.Check_shuffle();
 						break;
 					}
@@ -94,7 +106,8 @@ public class App {
 				// check for dealer bust before continuing
 				player_bust = d.check_hand(player_hand);
 				if (!player_bust) {
-					System.out.println("Player bust! Over 21. Player hand: " + player_hand);
+					// System.out.println("Player bust! Over 21. Player hand: "
+					// + player_hand);
 					d.Check_shuffle();
 					break;
 				}
@@ -102,7 +115,8 @@ public class App {
 				// check for dealer bust before continuing
 				dealer_bust = d.check_hand(dealer_hand);
 				if (!dealer_bust) {
-					System.out.println("Dealer bust! Over 21. Dealer hand: " + dealer_hand);
+					// System.out.println("Dealer bust! Over 21. Dealer hand: "
+					// + dealer_hand);
 					d.Check_shuffle();
 					break;
 				}
@@ -117,10 +131,10 @@ public class App {
 						}
 					}
 					dealer_win = d.check_for_blackjack(dealer_hand);
-					System.out.println("Dealer draw! " + dealer_draw);
+					// System.out.println("Dealer draw! " + dealer_draw);
 					dealer_card_count++;
 					if (dealer_win) {
-						System.out.println("Dealer blackjack!");
+						// System.out.println("Dealer blackjack!");
 						d.Check_shuffle();
 						break;
 					}
@@ -139,35 +153,40 @@ public class App {
 				player_card_count++;
 			}
 
-			System.out.println("Player hand: " + player_hand);
-			System.out.println("Dealer hand: " + dealer_hand);
+			// System.out.println("Player hand: " + player_hand);
+			// System.out.println("Dealer hand: " + dealer_hand);
 
 			if (d.check_hand(player_hand) && !dealer_win) {
 
 				if (player_hand > dealer_hand) {
 					player_win = true;
 					player_wins++;
-					System.out.println("Player won: PH " + player_hand + " VS DH " + dealer_hand);
+					// System.out.println("Player won: PH " + player_hand + " VS
+					// DH " + dealer_hand);
 				} else {
 					player_win = false;
 					dealer_wins++;
-					System.out.println("Player lost: PH " + player_hand + " VS DH " + dealer_hand);
+					// System.out.println("Player lost: PH " + player_hand + "
+					// VS DH " + dealer_hand);
 				}
 
 			} else {
 				player_win = false;
 				dealer_wins++;
-				System.out.println("Player lost: PH " + player_hand + " VS DH " + dealer_hand);
+				// System.out.println("Player lost: PH " + player_hand + " VS DH
+				// " + dealer_hand);
 			}
 
-			System.out.println("Player cardcount: " + player_card_count);
-			System.out.println("Dealer cardcount: " + dealer_card_count + "\n");
+			// System.out.println("Player cardcount: " + player_card_count);
+			// System.out.println("Dealer cardcount: " + dealer_card_count +
+			// "\n");
 
 			// End FOR
 		}
-
+		pb.stop();
 		long end = System.currentTimeMillis();
-		System.out.println("****************************************");
+
+		System.out.println("\n****************************************");
 		System.out.println("Player wins: " + player_wins);
 		System.out.println("Dealer wins: " + dealer_wins);
 		System.out.println("Total games: " + games);

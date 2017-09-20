@@ -39,7 +39,7 @@ public class Dealer {
 			if (deckList.get(card) != 0) {
 				deckList.set(card, deckList.get(card) - 1);
 				dealt = dealt + 1;
-				// System.out.println("Dealt a card " + random);
+				//System.out.println("Dealt a card " + random);
 				dublicate = false;
 			} else
 				dublicate = true;
@@ -50,7 +50,8 @@ public class Dealer {
 
 	public void Check_shuffle() {
 		//System.out.println((((double) dealt) / (52 * (double) decks)));
-		if ((((double) dealt) / (52 * (double) decks)) > 0.7) {
+		if ((((double) dealt) / (52 * (double) decks)) > 0.3) {
+
 			Shuffle_le_deck();
 		}
 	}
@@ -82,9 +83,9 @@ public class Dealer {
 	public boolean check_hand(int hand) {
 
 		if (hand > 21) {
-			return false;
-		} else {
 			return true;
+		} else {
+			return false;
 		}
 
 	}
@@ -98,4 +99,9 @@ public class Dealer {
 		return false;
 	}
 
+	public int returnDealtCardCount(){
+		
+		return dealt;
+	}
+	
 }

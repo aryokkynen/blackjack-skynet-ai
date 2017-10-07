@@ -1,209 +1,201 @@
 package ai_blackjack.skynet;
 
 import java.text.DecimalFormat;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import me.tongfei.progressbar.ProgressBar;
-import me.tongfei.progressbar.ProgressBarStyle;
 
 public class App {
 
 	private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 	// CHANGEABLE VARIABLES
-	static int min_tolerance = 2;
-	static int max_tolerance = 8;
-	static int games = 5000000;
-	static int player_starting_sum = 14;
-	static int dealer_wins = 0;
+	static int games_to_play = 40000;
+	static int total_games = 0;
+	static int decks = 4;
 	static int player_wins = 0;
+	static int dealer_wins = 0;
+	static DecimalFormat df = new DecimalFormat("####0.00");
+	static boolean silent = false;
 
 	public static void main(String[] args) {
 
+		long start = System.currentTimeMillis();
+
 		/*
-		 * Rules: Decks in shoe = 4 (This can be changed from Dealer.java)
-		 * Player draws first, then dealer for starting hand, repeat two times.
-		 * Create random game tolerance for player (Starting sum(Set to 21) -
-		 * random(1-5)), this is sum which player should not go. This can be
-		 * changed by modifying variable min/max tolerance
-		 * 
-		 * Decks in shoe are shuffled when there is less than <30% cards
-		 * remaining
-		 * 
-		 * Game flow fixed to follow proper blackjack rules.
-		 * 
-		 * Game flow is following: Player draws card Dealer draws card Player
-		 * draws card Dealer draws card Check for blackjack for either player or
-		 * dealer Do player actions (Check for bust and blackjack) Do dealer
-		 * actions (Check for bust and blackjack) Resolve winner
+		 * Modified version of
+		 * https://github.com/XinHuang123/BlackJack-with-Artificial-Intelligence
 		 */
 
 		// ALL or OFF
 		LOGGER.setLevel(Level.OFF);
 
-		ProgressBar pb = new ProgressBar("Simulating games", games, ProgressBarStyle.ASCII).start();
+		/*
+		 * Alpha = Learning rate, set between 0 and 1. Setting it to 0 means
+		 * that the Q-values are never updated, hence nothing is learned.
+		 * Setting a high value such as 0.9 means that learning can occur
+		 * quickly. 
+		 * 
+		 * Epsilon = Greedy Policy to allow the agent to occasionally
+		 * not to take the optimal action according to its experience. 
+		 * 
+		 * Discount = Gamma, this models the fact that future rewards are worth less than
+		 * immediate rewards
+		 */
 
-		DecimalFormat df = new DecimalFormat("####0.00");
-		long start = System.currentTimeMillis();
+		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
+		SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.7, 0.8, 0.9, games_to_play, "donkey");
+		train(donkey);
 
-		Dealer d = new Dealer();
-		d.Make_deck();
+		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
+		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.5, games_to_play, "GreedySkynet");
+		train(greedy);
 
-		for (int i = 0; i < games; i++) {
+		exploit(donkey);
+		exploit(greedy);
 
-			int player_hand;
-			int dealer_hand;
-			int player_card1 = d.Generate_random_card();
-			int dealer_card1 = d.Generate_random_card();
-			int player_card2 = d.Generate_random_card();
-			int dealer_card2 = d.Generate_random_card();
-			int player_hand_done = 0;
-			int dealer_hand_done = 0;
+		// Pair dpairs=(Pair) donkey.qvalues.keySet().toArray()[50];
+		// Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
 
-			player_hand = player_card1 + player_card2;
-			dealer_hand = dealer_card1 + dealer_card2;
-
-			// Check for starting hand blackjacks
-			boolean player_blackjack = d.check_for_blackjack(player_hand);
-			boolean dealer_blackjack = d.check_for_blackjack(dealer_hand);
-
-			if (!player_blackjack && !dealer_blackjack) {
-				player_hand_done = player_actions(player_hand, d);
-				dealer_hand_done = player_actions(dealer_hand, d);
-			}
-			if (player_blackjack) {
-				player_wins++;
-				continue;
-			} else if (dealer_blackjack) {
-				dealer_wins++;
-				continue;
-			}
-
-			
-			boolean is_dealer_hand_bust = d.check_hand(dealer_hand_done);
-			boolean is_player_hand_bust = d.check_hand(player_hand_done);
-			
-			if (is_player_hand_bust) {
-				LOGGER.info(LOGGER.getName() + " Player BUST with HAND --> " + player_hand_done + " VS Dealer " + dealer_hand_done + " ROUND: " + (i+1));
-				dealer_wins++;
-			} else if (is_dealer_hand_bust) {
-				LOGGER.info(LOGGER.getName() + " Dealer BUST with HAND --> " + player_hand_done + " VS Dealer " + dealer_hand_done + " ROUND: " + (i+1));
-				player_wins++;
-			}
-			
-			if (player_hand_done > dealer_hand_done && !is_dealer_hand_bust && !is_player_hand_bust){
-				LOGGER.info(LOGGER.getName() + " Player WIN with HAND --> " + player_hand_done + " VS Dealer " + dealer_hand_done + " ROUND: " + (i+1));
-				player_wins++;
-			} else if (dealer_hand_done >= player_hand_done &&!is_dealer_hand_bust && !is_player_hand_bust ){
-				dealer_wins++;
-				LOGGER.info(LOGGER.getName() + " Dealer WIN with HAND --> " + player_hand_done + " VS Dealer " + dealer_hand_done + " ROUND: " + (i+1));
-			}
-			
-			d.Check_shuffle();
-			pb.step();
-			// End FOR
-		}
-		pb.stop();
 		long end = System.currentTimeMillis();
 
-		System.out.println("\n****************************************");
-		System.out.println("Player wins: " + player_wins);
+		System.out.println("*******************************");
+		System.out.println("Skynet wins: " + player_wins);
 		System.out.println("Dealer wins: " + dealer_wins);
-		System.out.println("Total games: " + games);
-		System.out.println("Player win " + df.format(100 / ((double) games / (double) player_wins)) + "%");
+		System.out.println("Total games: " + total_games);
+		System.out.println("Skynet win " + df.format(100 / ((double) total_games / (double) player_wins))+ "%");
 		System.out.println("Execution time is " + df.format((end - start) / 1000d) + " seconds");
-		System.out.println("****************************************");
+		System.out.println("*******************************");
 
 	}
 
-	public static boolean flip_coin() {
-		int flip = 1 + (int) (Math.random() * 2);
+	public static void train(SkynetAiAgent agent) {
 
-		if (flip == 1) {
-			return true;
-		} else {
-			return false;
+		int total = 0;
+		int reward = 0;
+		int[] oldState;
+		int action;
+		int games = agent.numTraining;
+		while (agent.numTraining > 0) {
+			agent.dealer.gameBegin();
+			while (true) {
+				oldState = agent.getState();
+				action = agent.getAction(oldState);
+				if (agent.dealer.playerTurn(action)) {
+					break;
+				}
+				int[] newState = agent.getState();
+				reward = 0;
+				agent.update(oldState, action, newState, reward);
+			}
+			boolean isWin = agent.dealer.winFlag;
+			if (isWin) {
+				reward = 1;
+				total += 1;
+			} else {
+				reward = -1;
+			}
+			agent.update(oldState, action, agent.getState(), reward);
+			agent.numTraining -= 1;
+		}
+		if (!silent) {
+			System.out.println("*******TRAINING DATA***********");
+			System.out.println("Agent: " + agent.getName());
+			System.out.println("Won " + total + " out of " + games);
+			System.out.println("Training win " + df.format(100 / ((double) games / (double) total)) + "%");
+			System.out.println("*******TRAINING DATA***********\n");
 		}
 	}
 
-	public static int player_actions(int player_hand, Dealer d) {
-		
-		boolean player_bust = false;
-		boolean blackjack = false;
-		int tolerance = player_starting_sum + (min_tolerance + (int) (Math.random() * max_tolerance));
+	public static void exploit(SkynetAiAgent agent) {
+		int total = 0;
+		int games = 0;
+		int reward = 0;
+		int[] oldState;
+		int action;
+		agent.setEpsilon(0);
+		agent.setAlpha(0.2);
 
-		do {
-
-			if (player_hand < tolerance) {
-				LOGGER.info("player_actions() --> player hand before draw --> " + player_hand);
-				int player_draw = d.Generate_random_card();
-				player_hand = player_hand + player_draw;
-				LOGGER.info("player_actions() --> player draw card --> " + player_draw);
-
-				// check for player bust before continuing
-				player_bust = d.check_hand(player_hand);
-				if (player_bust) {
-					LOGGER.info("player_actions() --> Player BUST --> " + player_hand);
+		while (games < games_to_play) {
+			agent.dealer.gameBegin();
+			while (true) {
+				oldState = agent.getState();
+				action = agent.getAction(oldState);
+				if (agent.dealer.playerTurn(action)) {
 					break;
 				}
+				int[] newState = agent.getState();
+				reward = 0;
+				agent.update(oldState, action, newState, reward);
 
-				// Determine if Ace should be used as "11"
-				if (player_draw == 1) {
-					if (player_hand <= 12) {
-						player_draw = 11;
-					}
-				}
-				blackjack = d.check_for_blackjack(player_hand);
-				if (blackjack) {
-					LOGGER.info("player_actions() --> Player blackjack --> " + player_hand);
-					break;
-				}
-			} else if (player_hand >= tolerance) {
-				break;
 			}
-
-			LOGGER.info("player_actions() --> Player hand --> " + player_hand);
-
-		} while (true);
-
-		return player_hand;
-
+			boolean isWin = agent.dealer.winFlag;
+			if (isWin) {
+				reward = 1;
+				total += 1;
+				player_wins++;
+			} else {
+				reward = -1;
+				dealer_wins++;
+			}
+			agent.update(oldState, action, agent.getState(), reward);
+			games += 1;
+			total_games++;
+		}
+		if (!silent) {
+			System.out.println("*******AGENT PLAY DATA*********");
+			System.out.println("Agent: " + agent.getName());
+			System.out.println("Won " + total + " out of " + games);
+			System.out.println("Training win " + df.format(100 / ((double) games / (double) total)) + "%");
+			System.out.println("*******AGENT PLAY DATA*********\n");
+		}
 	}
 
-	public static int dealer_actions(int dealer_hand, Dealer d) {
+	@SuppressWarnings("unused")
+	public static void play(SkynetAiAgent agent) {
 
-		boolean dealer_bust = false;
-		boolean blackjack = false;
-		
-		do {
+		int total = 0;
+		int reward = 0;
+		int[] oldState;
+		int action;
+		int str;
+		int games = agent.numTraining;
+		Scanner in = new Scanner(System.in);
 
-			if (dealer_hand < 17) {
-				LOGGER.info("dealer_actions() --> dealer hand before draw --> " + dealer_hand);
-				int dealer_draw = d.Generate_random_card();
-				dealer_hand = dealer_hand + dealer_draw;
-				LOGGER.info("dealer_actions() --> Dealer draw card --> " + dealer_draw);
-				if (dealer_draw == 1) {
-					if (dealer_hand <= 12) {
-						dealer_hand = 11;
-					}
-				}
+		while (true) {
+			agent.dealer.gameBegin();
+			System.out.println("\nNew game begins!\n");
+			while (true) {
+				agent.dealer.display();
+				oldState = agent.getState();
+				action = agent.getAction(oldState);
+				System.out.println("Suggestion:" + agent.getAction(oldState));
+				System.out.println("Please Enter 1 to Hit, 2 to Stand: ");
 
-				blackjack = d.check_for_blackjack(dealer_hand);
-				if (blackjack) {
-					LOGGER.info("dealer_actions() --> Dealer Blackjack --> " + dealer_hand);
+				str = in.nextInt();
+
+				if (agent.dealer.playerTurn(str)) {
 					break;
 				}
-
-				dealer_bust = d.check_hand(dealer_hand);
-				if (dealer_bust) {
-					LOGGER.info("dealer_actions() --> Dealer BUST --> " + dealer_hand);
-					break;
-				}
+				int[] newState = agent.getState();
+				reward = 0;
+				agent.update(oldState, str, newState, reward);
 			}
-		} while (true);
+			boolean isWin = agent.dealer.winFlag;
+			agent.dealer.display();
+			if (isWin) {
+				reward = 1;
+				total += 1;
+				System.out.println("WIN");
+			} else {
+				reward = -1;
+				System.out.println("LOSE");
+			}
+			agent.dealer.display();
+			agent.update(oldState, str, agent.getState(), reward);
+			agent.numTraining -= 1;
+			in.close();
+		}
 
-		LOGGER.info("dealer_actions() --> Dealer Hand --> " + dealer_hand);
-		return dealer_hand;
 	}
 
 }

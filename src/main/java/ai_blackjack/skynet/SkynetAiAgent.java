@@ -1,5 +1,6 @@
 package ai_blackjack.skynet;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -44,6 +45,12 @@ public class SkynetAiAgent {
 		return this.getPolicy(state);
 	}
 
+	public void printQvalues(){
+		
+		qvalues.forEach((pair,reward)->System.out.println("State : " + Arrays.toString(pair.state) + " qvalue : " + reward));
+				
+	}
+	
 	public int getPolicy(int[] state) {
 		
 		double maxValue = -99999.0;
@@ -97,6 +104,9 @@ public class SkynetAiAgent {
 	
 	public void update(int[] state,int action,int[] nextState,int reward){
 		double qvalue=this.getQValue(state, action)+this.alpha*( reward + this.discount * this.getValue(nextState) - this.getQValue(state, action) );
+		//System.out.println("Qvalue: " + this.getQValue(state, action)+this.alpha*( reward + this.discount * this.getValue(nextState) - this.getQValue(state, action)));
+		//System.out.println("State: " + Arrays.toString(state));
+		//System.out.println("Action: "+ action);
 		Pair pair=new Pair(state,action);
 		this.qvalues.put(pair, qvalue);
 	}

@@ -9,7 +9,7 @@ public class App {
 
 	private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 	// CHANGEABLE VARIABLES
-	static int games_to_play = 40000;
+	static int games_to_play = 10;
 	static int total_games = 0;
 	static int decks = 4;
 	static int player_wins = 0;
@@ -52,10 +52,16 @@ public class App {
 
 		exploit(donkey);
 		exploit(greedy);
+		
+		//donkey.printQvalues();
+		//System.out.println("**AAA");
+		greedy.printQvalues();
+		
+		
 
-		// Pair dpairs=(Pair) donkey.qvalues.keySet().toArray()[50];
-		// Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
-
+	//	Pair dpairs=(Pair) donkey.qvalues.keySet().toArray()[50];
+	//	Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
+		
 		long end = System.currentTimeMillis();
 
 		System.out.println("*******************************");
@@ -112,8 +118,9 @@ public class App {
 		int reward = 0;
 		int[] oldState;
 		int action;
-		agent.setEpsilon(0);
-		agent.setAlpha(0.2);
+		//Stop greedy and learning
+		agent.setEpsilon(0.01);
+		agent.setAlpha(0);
 
 		while (games < games_to_play) {
 			agent.dealer.gameBegin();

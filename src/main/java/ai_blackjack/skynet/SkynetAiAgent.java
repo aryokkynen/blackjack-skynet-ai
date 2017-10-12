@@ -1,5 +1,6 @@
 package ai_blackjack.skynet;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
@@ -12,6 +13,7 @@ public class SkynetAiAgent {
 	int numTraining;
 	Dealer dealer;
 	HashMap<Pair,Double> qvalues;
+	static DecimalFormat df = new DecimalFormat("####0.00");
 	
 	public SkynetAiAgent(int numDecks,double e,double d, double a,int numTraining, String name){
 		this.name=name;
@@ -47,8 +49,8 @@ public class SkynetAiAgent {
 
 	public void printQvalues(){
 		
-		qvalues.forEach((pair,reward)->System.out.println("State : " + Arrays.toString(pair.state) + " qvalue : " + reward));
-				
+		qvalues.forEach((pair,reward)->System.out.println("State : " + Arrays.toString(pair.state) + " qvalue : " + df.format(reward) + " AI action(1Hit/2Stay): " + pair.action));
+		System.out.println("Hashmap size: " + qvalues.size());		
 	}
 	
 	public int getPolicy(int[] state) {

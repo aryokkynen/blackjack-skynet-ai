@@ -8,18 +8,20 @@ import java.util.logging.Logger;
 public class App {
 
 	private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+	
 	// CHANGEABLE VARIABLES
-	static int games_to_play = 10;
+	static int games_to_play = 500000;
 	static int total_games = 0;
 	static int decks = 4;
 	static int player_wins = 0;
 	static int dealer_wins = 0;
 	static DecimalFormat df = new DecimalFormat("####0.00");
 	static boolean silent = false;
+	
 
 	public static void main(String[] args) {
-
 		long start = System.currentTimeMillis();
+		
 
 		/*
 		 * Modified version of
@@ -44,18 +46,18 @@ public class App {
 
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
 		SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.7, 0.8, 0.9, games_to_play, "donkey");
-		train(donkey);
+		//train(donkey);
 
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
 		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.5, games_to_play, "GreedySkynet");
 		train(greedy);
 
-		exploit(donkey);
+		//exploit(donkey);
 		exploit(greedy);
 		
+		//Do not enable on larger set of games, very slow. Suggested games <10000
 		//donkey.printQvalues();
-		//System.out.println("**AAA");
-		greedy.printQvalues();
+		//greedy.printQvalues();
 		
 		
 
@@ -75,7 +77,7 @@ public class App {
 	}
 
 	public static void train(SkynetAiAgent agent) {
-
+		long start = System.currentTimeMillis();
 		int total = 0;
 		int reward = 0;
 		int[] oldState;
@@ -95,7 +97,7 @@ public class App {
 			}
 			boolean isWin = agent.dealer.winFlag;
 			if (isWin) {
-				reward = 1;
+				reward = 2;
 				total += 1;
 			} else {
 				reward = -1;
@@ -104,23 +106,26 @@ public class App {
 			agent.numTraining -= 1;
 		}
 		if (!silent) {
+			long training_end = System.currentTimeMillis();
 			System.out.println("*******TRAINING DATA***********");
 			System.out.println("Agent: " + agent.getName());
 			System.out.println("Won " + total + " out of " + games);
 			System.out.println("Training win " + df.format(100 / ((double) games / (double) total)) + "%");
+			System.out.println("Training took " + df.format((training_end - start) / 1000d) + " seconds");
 			System.out.println("*******TRAINING DATA***********\n");
 		}
 	}
 
 	public static void exploit(SkynetAiAgent agent) {
+		long start = System.currentTimeMillis();
 		int total = 0;
 		int games = 0;
 		int reward = 0;
 		int[] oldState;
 		int action;
-		//Stop greedy and learning
+		//Stop greedy and set learning rate to conservative
 		agent.setEpsilon(0.01);
-		agent.setAlpha(0);
+		agent.setAlpha(0.2);
 
 		while (games < games_to_play) {
 			agent.dealer.gameBegin();
@@ -137,7 +142,7 @@ public class App {
 			}
 			boolean isWin = agent.dealer.winFlag;
 			if (isWin) {
-				reward = 1;
+				reward = 3;
 				total += 1;
 				player_wins++;
 			} else {
@@ -149,10 +154,12 @@ public class App {
 			total_games++;
 		}
 		if (!silent) {
+			long playing_end = System.currentTimeMillis();
 			System.out.println("*******AGENT PLAY DATA*********");
 			System.out.println("Agent: " + agent.getName());
 			System.out.println("Won " + total + " out of " + games);
 			System.out.println("Training win " + df.format(100 / ((double) games / (double) total)) + "%");
+			System.out.println("Playing took " + df.format((playing_end - start) / 1000d) + " seconds");
 			System.out.println("*******AGENT PLAY DATA*********\n");
 		}
 	}

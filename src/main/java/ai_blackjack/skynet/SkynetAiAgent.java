@@ -165,5 +165,17 @@ public class SkynetAiAgent {
 	public String getName(){
 		return this.name;
 	}
+	
+	public Double getEpsilon(){
+		return this.epsilon;
+	}
+	
+	public Double getAlpha(){
+		return this.alpha;
+	}
+	
+	public Double getDiscount(){
+		return this.discount;
+	}
 
 }

@@ -11,14 +11,15 @@ public class App {
 	private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 	
 	// CHANGEABLE VARIABLES
-	static int games_to_play = 100;
+	static int games_to_play = 500000;
 	static int total_games = 0;
 	static int decks = 4;
 	static int player_wins = 0;
 	static int dealer_wins = 0;
 	static DecimalFormat df = new DecimalFormat("####0.00");
 	static boolean silent = false;
-	
+	static double best_win = 0;
+	static String best_agent_name;
 
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
@@ -56,18 +57,50 @@ public class App {
 		exploit(donkey);
 		exploit(greedy);
 		
+		
+		// Batch testing of agents
+		/*
+		for (int i = 1; i < 11; i++) {
+			String name = "donkey"+i;
+			SkynetAiAgent q = new SkynetAiAgent(decks, (i*0.1), (0.1), (0.1), games_to_play, name);
+			SkynetAiAgent q2 = new SkynetAiAgent(decks, (0.1), (i*0.1), (0.1), games_to_play, name + "q2");
+			SkynetAiAgent q3 = new SkynetAiAgent(decks, (0.1), (0.1), (i*0.1), games_to_play, name + "q3");
+			SkynetAiAgent q4 = new SkynetAiAgent(decks, (i*0.1), (i*0.1), (0.1), games_to_play, name + "q4");
+			SkynetAiAgent q5 = new SkynetAiAgent(decks, (0.1), (i*0.1), (i*0.1), games_to_play, name + "q5");
+			SkynetAiAgent q6 = new SkynetAiAgent(decks, (i*0.1), (0.1), (i*0.1), games_to_play, name + "q6");
+			SkynetAiAgent q7= new SkynetAiAgent(decks, (i*0.1), (i*0.1), (i*0.1), games_to_play, name + "q7");
+			
+			train(q);
+			exploit(q);
+			train(q2);
+			exploit(q2);
+			train(q3);
+			exploit(q3);
+			train(q4);
+			exploit(q4);
+			train(q5);
+			exploit(q5);
+			train(q6);
+			exploit(q6);
+			train(q7);
+			exploit(q7);
+			//q.saveQvaluesToCSV();
+		}
+		*/
+		
 		//Do not enable on larger set of games, very slow. Suggested games <10000
 		//donkey.printQvalues();
 		//greedy.printQvalues();
 		
-		greedy.saveQvaluesToCSV();
-		donkey.saveQvaluesToCSV();
+		//greedy.saveQvaluesToCSV();
+		//donkey.saveQvaluesToCSV();
 
-	//	Pair dpairs=(Pair) donkey.qvalues.keySet().toArray()[50];
-	//	Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
+		//Pair dpairs=(Pair) donkey.qvalues.keySet().toArray()[50];
+		//Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
 		
 		long end = System.currentTimeMillis();
-
+		System.out.println("*******************************");
+		System.out.println("Best agent, w%" + df.format(best_win) + " Name: " + best_agent_name);
 		System.out.println("*******************************");
 		System.out.println("Skynet wins: " + player_wins);
 		System.out.println("Dealer wins: " + dealer_wins);
@@ -120,6 +153,7 @@ public class App {
 			System.out.println("*******TRAINING DATA***********");
 			System.out.println("Agent: " + agent.getName());
 			System.out.println("Won " + total + " out of " + games);
+			System.out.println("Agent specs: A:" + agent.getAlpha() + " D: " + agent.getDiscount() + " E: " + agent.epsilon);
 			System.out.println("Training win " + df.format(100 / ((double) games / (double) total)) + "%");
 			System.out.println("Training took " + df.format((training_end - start) / 1000d) + " seconds");
 			System.out.println("*******TRAINING DATA***********\n");
@@ -171,12 +205,17 @@ public class App {
 		}
 		if (!silent) {
 			long playing_end = System.currentTimeMillis();
+			double win = 100 / ((double) games / (double) total);
 			System.out.println("*******AGENT PLAY DATA*********");
 			System.out.println("Agent: " + agent.getName());
 			System.out.println("Won " + total + " out of " + games);
-			System.out.println("Training win " + df.format(100 / ((double) games / (double) total)) + "%");
+			System.out.println("Playing win " + df.format(100 / ((double) games / (double) total)) + "%");
 			System.out.println("Playing took " + df.format((playing_end - start) / 1000d) + " seconds");
 			System.out.println("*******AGENT PLAY DATA*********\n");
+			if (win > best_win){
+				best_win = win;
+				best_agent_name = agent.getName();
+			}
 		}
 	}
 

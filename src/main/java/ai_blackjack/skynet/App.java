@@ -1,5 +1,6 @@
 package ai_blackjack.skynet;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -10,7 +11,7 @@ public class App {
 	private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 	
 	// CHANGEABLE VARIABLES
-	static int games_to_play = 500000;
+	static int games_to_play = 100;
 	static int total_games = 0;
 	static int decks = 4;
 	static int player_wins = 0;
@@ -19,7 +20,7 @@ public class App {
 	static boolean silent = false;
 	
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 		
 
@@ -46,20 +47,21 @@ public class App {
 
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
 		SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.7, 0.8, 0.9, games_to_play, "donkey");
-		//train(donkey);
+		train(donkey);
 
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
-		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.5, games_to_play, "GreedySkynet");
+		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_play, "GreedySkynet");
 		train(greedy);
 
-		//exploit(donkey);
+		exploit(donkey);
 		exploit(greedy);
 		
 		//Do not enable on larger set of games, very slow. Suggested games <10000
 		//donkey.printQvalues();
 		//greedy.printQvalues();
 		
-		
+		greedy.saveQvaluesToCSV();
+		donkey.saveQvaluesToCSV();
 
 	//	Pair dpairs=(Pair) donkey.qvalues.keySet().toArray()[50];
 	//	Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
@@ -97,11 +99,19 @@ public class App {
 			}
 			boolean isWin = agent.dealer.winFlag;
 			if (isWin) {
-				reward = 2;
+				reward = 100;
 				total += 1;
+				
 			} else {
-				reward = -1;
+				reward = -50;
 			}
+			
+			int dealer_hand_count = agent.dealer.dealerHand.size();
+			int player_hand_count = agent.dealer.playerHand.size();
+			int dealer_hand_value = agent.dealer.getDealerValue();
+			int player_hand_value = agent.dealer.getPlayerValue();
+			
+			agent.info.add(player_hand_count + "#" + player_hand_value + "#" + dealer_hand_count + "#" +dealer_hand_value + "#" + isWin + "#" + agent.getName());
 			agent.update(oldState, action, agent.getState(), reward);
 			agent.numTraining -= 1;
 		}
@@ -142,13 +152,19 @@ public class App {
 			}
 			boolean isWin = agent.dealer.winFlag;
 			if (isWin) {
-				reward = 3;
+				reward = 150;
 				total += 1;
 				player_wins++;
 			} else {
-				reward = -1;
+				reward = -50;
 				dealer_wins++;
 			}
+			int dealer_hand_count = agent.dealer.dealerHand.size();
+			int player_hand_count = agent.dealer.playerHand.size();
+			int dealer_hand_value = agent.dealer.getDealerValue();
+			int player_hand_value = agent.dealer.getPlayerValue();
+			
+			agent.info.add(player_hand_count + "#" + player_hand_value + "#" + dealer_hand_count + "#" +dealer_hand_value + "#" + isWin + "#" + agent.getName());
 			agent.update(oldState, action, agent.getState(), reward);
 			games += 1;
 			total_games++;

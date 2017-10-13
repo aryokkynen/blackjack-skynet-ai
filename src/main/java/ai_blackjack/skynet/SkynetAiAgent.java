@@ -1,11 +1,19 @@
 package ai_blackjack.skynet;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+
 public class SkynetAiAgent {
+	int count = 0;
 	double epsilon;
 	double discount;
 	double alpha;
@@ -13,7 +21,9 @@ public class SkynetAiAgent {
 	int numTraining;
 	Dealer dealer;
 	HashMap<Pair,Double> qvalues;
+	List<Object> info;
 	static DecimalFormat df = new DecimalFormat("####0.00");
+	String[] HEADERS = { "STATE", "QVALUE", "AI SUGGESTED ACTION", "PLAYER HAND SIZE", "PLAYER HAND VALUE" , "DEALER HAND SIZE" , "DEALER HAND VALUE", "GAME RESULT", "SKYNET HANDLE"};
 	
 	public SkynetAiAgent(int numDecks,double e,double d, double a,int numTraining, String name){
 		this.name=name;
@@ -23,6 +33,7 @@ public class SkynetAiAgent {
 		this.numTraining=numTraining;
 		this.dealer=new Dealer(numDecks,true);
 		this.qvalues=new HashMap<Pair,Double>();
+		this.info = new ArrayList<>();
 	}
 	
 	public int[] getState(){
@@ -51,6 +62,32 @@ public class SkynetAiAgent {
 		
 		qvalues.forEach((pair,reward)->System.out.println("State : " + Arrays.toString(pair.state) + " qvalue : " + df.format(reward) + " AI action(1Hit/2Stay): " + pair.action));
 		System.out.println("Hashmap size: " + qvalues.size());		
+	}
+	
+	public void saveQvaluesToCSV() throws IOException{
+		
+		 FileWriter out = new FileWriter("Qvalues_"+ getName() + ".csv");
+		    try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT
+		      .withHeader(HEADERS))) {
+		    	qvalues.forEach((pair, reward) -> {
+		    		
+		            try {
+						 if (count < info.size()) { // Print end of game info
+							 printer.printRecord(Arrays.toString(pair.state), reward, pair.action, info.get(count));
+						 }
+						 else { // Print only state updates
+							 printer.printRecord(Arrays.toString(pair.state), reward, pair.action);
+						 }
+						 count++;
+					} catch (Exception e) {
+						
+					}
+		           
+		        });
+		    	System.out.println("Hashmap size: " + qvalues.size());	
+		    }
+		
+   
 	}
 	
 	public int getPolicy(int[] state) {

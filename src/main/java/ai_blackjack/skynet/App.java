@@ -12,8 +12,9 @@ public class App {
 	
 	// CHANGEABLE VARIABLES
 	static int games_to_play = 500000;
-	static int total_games = 0;
 	static int decks = 4;
+	// DO NOT CHANGE THESE
+	static int total_games = 0;
 	static int player_wins = 0;
 	static int dealer_wins = 0;
 	static DecimalFormat df = new DecimalFormat("####0.00");
@@ -24,7 +25,6 @@ public class App {
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 		
-
 		/*
 		 * Modified version of
 		 * https://github.com/XinHuang123/BlackJack-with-Artificial-Intelligence
@@ -100,7 +100,7 @@ public class App {
 		
 		long end = System.currentTimeMillis();
 		System.out.println("*******************************");
-		System.out.println("Best agent, w%" + df.format(best_win) + " Name: " + best_agent_name);
+		System.out.println("Best agent, win " + df.format(best_win) + "% Name: " + best_agent_name);
 		System.out.println("*******************************");
 		System.out.println("Skynet wins: " + player_wins);
 		System.out.println("Dealer wins: " + dealer_wins);
@@ -168,7 +168,7 @@ public class App {
 		int[] oldState;
 		int action;
 		//Stop greedy and set learning rate to conservative
-		agent.setEpsilon(0.01);
+		agent.setEpsilon(0);
 		agent.setAlpha(0.2);
 
 		while (games < games_to_play) {
@@ -208,6 +208,7 @@ public class App {
 			double win = 100 / ((double) games / (double) total);
 			System.out.println("*******AGENT PLAY DATA*********");
 			System.out.println("Agent: " + agent.getName());
+			System.out.println("Agent specs: A:" + agent.getAlpha() + " D: " + agent.getDiscount() + " E: " + agent.epsilon);
 			System.out.println("Won " + total + " out of " + games);
 			System.out.println("Playing win " + df.format(100 / ((double) games / (double) total)) + "%");
 			System.out.println("Playing took " + df.format((playing_end - start) / 1000d) + " seconds");

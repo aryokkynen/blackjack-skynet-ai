@@ -154,6 +154,10 @@ public class SkynetAiAgent {
 		this.epsilon=e;
 	}
 	
+	public void setDiscount(double d){
+		this.discount=d;
+	}
+	
 	public void setAlpha(double a){
 		this.alpha=a;
 	}

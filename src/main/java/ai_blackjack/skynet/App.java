@@ -12,7 +12,7 @@ public class App {
 	// CHANGEABLE VARIABLES
 	static int games_to_train = 50000;
 	static int games_to_exploit = 50000;
-	static int games_to_play_with_money = 500;
+	static int games_to_play_with_money = 500000;
 	static int decks = 1;
 	static double agent_money = 1000;
 	static double default_bet = 10;
@@ -50,28 +50,28 @@ public class App {
 		 */
 
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
-		SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_train, "donkey", agent_money);
-		train(donkey);
-		exploit(donkey);
-		playWithMoney(donkey, default_bet);
+		//SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.4, 0.2, 0.5, games_to_train, "donkey", agent_money);
+		//train(donkey);
+		//exploit(donkey);
+		//playWithMoney(donkey, default_bet);
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
 		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_train, "GreedySkynet", agent_money);
 		train(greedy);
 		exploit(greedy);
-		playWithMoney(greedy, 25);
+		playWithMoney(greedy, default_bet);
 		
 		
 		// Batch testing of agents
 		/*
 		for (int i = 1; i < 11; i++) {
 			String name = "donkey"+i;
-			SkynetAiAgent q = new SkynetAiAgent(decks, (i*0.1), (0.1), (0.1), games_to_play, name);
-			SkynetAiAgent q2 = new SkynetAiAgent(decks, (0.1), (i*0.1), (0.1), games_to_play, name + "q2");
-			SkynetAiAgent q3 = new SkynetAiAgent(decks, (0.1), (0.1), (i*0.1), games_to_play, name + "q3");
-			SkynetAiAgent q4 = new SkynetAiAgent(decks, (i*0.1), (i*0.1), (0.1), games_to_play, name + "q4");
-			SkynetAiAgent q5 = new SkynetAiAgent(decks, (0.1), (i*0.1), (i*0.1), games_to_play, name + "q5");
-			SkynetAiAgent q6 = new SkynetAiAgent(decks, (i*0.1), (0.1), (i*0.1), games_to_play, name + "q6");
-			SkynetAiAgent q7= new SkynetAiAgent(decks, (i*0.1), (i*0.1), (i*0.1), games_to_play, name + "q7");
+			SkynetAiAgent q = new SkynetAiAgent(decks, (i*0.1), (0.1), (0.1), games_to_train, name, agent_money);
+			SkynetAiAgent q2 = new SkynetAiAgent(decks, (0.1), (i*0.1), (0.1), games_to_train, name + "q2", agent_money);
+			SkynetAiAgent q3 = new SkynetAiAgent(decks, (0.1), (0.1), (i*0.1), games_to_train, name + "q3", agent_money);
+			SkynetAiAgent q4 = new SkynetAiAgent(decks, (i*0.1), (i*0.1), (0.1), games_to_train, name + "q4", agent_money);
+			SkynetAiAgent q5 = new SkynetAiAgent(decks, (0.1), (i*0.1), (i*0.1), games_to_train, name + "q5", agent_money);
+			SkynetAiAgent q6 = new SkynetAiAgent(decks, (i*0.1), (0.1), (i*0.1), games_to_train, name + "q6", agent_money);
+			SkynetAiAgent q7= new SkynetAiAgent(decks, (i*0.1), (i*0.1), (i*0.1), games_to_train, name + "q7", agent_money);
 			
 			train(q);
 			exploit(q);
@@ -87,6 +87,14 @@ public class App {
 			exploit(q6);
 			train(q7);
 			exploit(q7);
+			playWithMoney(q, default_bet);
+			playWithMoney(q2, default_bet);
+			playWithMoney(q3, default_bet);
+			playWithMoney(q4, default_bet);
+			playWithMoney(q5, default_bet);
+			playWithMoney(q6, default_bet);
+			playWithMoney(q7, default_bet);
+			
 			//q.saveQvaluesToCSV();
 		}
 		*/
@@ -104,7 +112,7 @@ public class App {
 		long end = System.currentTimeMillis();
 		System.out.println("*******************************");
 		System.out.println("Best agent, win " + df.format(best_win) + "% Name: " + best_agent.getName());
-		System.out.println("Best agent, balance: " + best_agent.getMoney());
+		System.out.println("Best agent, balance: " + df.format(best_agent.getMoney()));
 		System.out.println("*******************************");
 		System.out.println("Skynet wins: " + player_wins);
 		System.out.println("Dealer wins: " + dealer_wins);
@@ -175,7 +183,7 @@ public class App {
 		agent.setEpsilon(0);
 		agent.setAlpha(0.2);
 
-		while (games < games_to_train) {
+		while (games < games_to_exploit) {
 			agent.dealer.gameBegin();
 			
 			while (true) {

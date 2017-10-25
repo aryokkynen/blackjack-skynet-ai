@@ -17,6 +17,7 @@ public class SkynetAiAgent {
 	double epsilon;
 	double discount;
 	double alpha;
+	double money;
 	String name;
 	int numTraining;
 	Dealer dealer;
@@ -25,7 +26,7 @@ public class SkynetAiAgent {
 	static DecimalFormat df = new DecimalFormat("####0.00");
 	String[] HEADERS = { "STATE", "QVALUE", "AI SUGGESTED ACTION", "PLAYER HAND SIZE", "PLAYER HAND VALUE" , "DEALER HAND SIZE" , "DEALER HAND VALUE", "GAME RESULT", "SKYNET HANDLE"};
 	
-	public SkynetAiAgent(int numDecks,double e,double d, double a,int numTraining, String name){
+	public SkynetAiAgent(int numDecks,double e,double d, double a,int numTraining, String name, double m){
 		this.name=name;
 		this.epsilon=e;
 		this.discount=d;
@@ -34,8 +35,9 @@ public class SkynetAiAgent {
 		this.dealer=new Dealer(numDecks,true);
 		this.qvalues=new HashMap<Pair,Double>();
 		this.info = new ArrayList<>();
+		this.money=m;
 	}
-	
+		
 	public int[] getState(){
 		int[] state=new int[4];
 		state[0]=this.dealer.getPlayerValue();
@@ -182,4 +184,12 @@ public class SkynetAiAgent {
 		return this.discount;
 	}
 
+	public void setMoney(double money){
+		this.money = money;
+	}
+	
+	public double getMoney(){
+		return this.money;
+	}
+	
 }

@@ -2,7 +2,6 @@ package ai_blackjack.skynet;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,8 +10,12 @@ public class App {
 	private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 	
 	// CHANGEABLE VARIABLES
-	static int games_to_play = 500000;
-	static int decks = 4;
+	static int games_to_train = 50000;
+	static int games_to_exploit = 50000;
+	static int games_to_play_with_money = 500;
+	static int decks = 1;
+	static double agent_money = 1000;
+	static double default_bet = 10;
 	// DO NOT CHANGE THESE
 	static int total_games = 0;
 	static int player_wins = 0;
@@ -20,7 +23,7 @@ public class App {
 	static DecimalFormat df = new DecimalFormat("####0.00");
 	static boolean silent = false;
 	static double best_win = 0;
-	static String best_agent_name;
+	static SkynetAiAgent best_agent;
 
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
@@ -47,15 +50,15 @@ public class App {
 		 */
 
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
-		SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.7, 0.8, 0.9, games_to_play, "donkey");
+		SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_train, "donkey", agent_money);
 		train(donkey);
-
-		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
-		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_play, "GreedySkynet");
-		train(greedy);
-
 		exploit(donkey);
+		playWithMoney(donkey, default_bet);
+		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
+		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_train, "GreedySkynet", agent_money);
+		train(greedy);
 		exploit(greedy);
+		playWithMoney(greedy, 25);
 		
 		
 		// Batch testing of agents
@@ -100,7 +103,8 @@ public class App {
 		
 		long end = System.currentTimeMillis();
 		System.out.println("*******************************");
-		System.out.println("Best agent, win " + df.format(best_win) + "% Name: " + best_agent_name);
+		System.out.println("Best agent, win " + df.format(best_win) + "% Name: " + best_agent.getName());
+		System.out.println("Best agent, balance: " + best_agent.getMoney());
 		System.out.println("*******************************");
 		System.out.println("Skynet wins: " + player_wins);
 		System.out.println("Dealer wins: " + dealer_wins);
@@ -132,11 +136,11 @@ public class App {
 			}
 			boolean isWin = agent.dealer.winFlag;
 			if (isWin) {
-				reward = 100;
+				reward = 1;
 				total += 1;
 				
 			} else {
-				reward = -50;
+				reward = -1;
 			}
 			
 			int dealer_hand_count = agent.dealer.dealerHand.size();
@@ -171,8 +175,9 @@ public class App {
 		agent.setEpsilon(0);
 		agent.setAlpha(0.2);
 
-		while (games < games_to_play) {
+		while (games < games_to_train) {
 			agent.dealer.gameBegin();
+			
 			while (true) {
 				oldState = agent.getState();
 				action = agent.getAction(oldState);
@@ -186,13 +191,86 @@ public class App {
 			}
 			boolean isWin = agent.dealer.winFlag;
 			if (isWin) {
-				reward = 150;
+				reward = 2;
+				total += 1;
+			} else {
+				reward = -1;
+			}
+			
+			//agent.info.add(player_hand_count + "#" + player_hand_value + "#" + dealer_hand_count + "#" +dealer_hand_value + "#" + isWin + "#" + agent.getName());
+			agent.update(oldState, action, agent.getState(), reward);
+			games += 1;
+			
+		}
+		if (!silent) {
+			long playing_end = System.currentTimeMillis();			
+			System.out.println("*******AGENT EXPLOIT DATA*********");
+			System.out.println("Agent: " + agent.getName());
+			System.out.println("Agent specs: A:" + agent.getAlpha() + " D: " + agent.getDiscount() + " E: " + agent.epsilon);
+			System.out.println("Won " + total + " out of " + games);
+			System.out.println("Playing win " + df.format(100 / ((double) games / (double) total)) + "%");
+			System.out.println("Playing took " + df.format((playing_end - start) / 1000d) + " seconds");
+			System.out.println("*******AGENT EXPLOIT DATA*********\n");
+
+		}
+	}
+
+	
+	public static void playWithMoney(SkynetAiAgent agent, double bet) {
+		long start = System.currentTimeMillis();
+		int total = 0;
+		int reward = 0;
+		int[] oldState;
+		int action;
+		int games = agent.numTraining;
+		
+		//Stop learning, use stuff you have. Update rewards on win/loss still.
+		agent.setEpsilon(0);
+		agent.setAlpha(0);
+		agent.setDiscount(0);
+		
+
+		while (games < games_to_play_with_money) {
+			agent.dealer.gameBegin();
+			agent.setMoney(agent.money-bet);
+			while (true) {
+				oldState = agent.getState();
+				action = agent.getAction(oldState);
+				if (agent.dealer.playerTurn(action)) {
+					break;
+				}
+				int[] newState = agent.getState();
+				reward = 0;
+				agent.update(oldState, action, newState, reward);
+
+			}
+			boolean isWin = agent.dealer.winFlag;
+			if (isWin) {
+				reward = 1;
 				total += 1;
 				player_wins++;
+				if (agent.dealer.getPlayerValue() == 21 && agent.dealer.getPlayerHand().size() == 2){
+					agent.setMoney(agent.money = agent.money + bet*5);
+					//System.out.println("Jackpot with two cards, won: "+ (bet*5));
+					
+				}
+				
+				else if (agent.dealer.getPlayerValue() == 21) {
+					agent.setMoney(agent.money = (agent.money + bet*3.5));
+					//System.out.println("Jackpot, won: "+ bet*3.5);
+					
+				}
+				else {
+					agent.setMoney(agent.money = (agent.money + bet*2));
+					//System.out.println("Won: "+ (bet*2));
+				}
+
+				
 			} else {
-				reward = -50;
+				reward = -1;
 				dealer_wins++;
 			}
+			//System.out.println("Agent money: " + agent.money);
 			int dealer_hand_count = agent.dealer.dealerHand.size();
 			int player_hand_count = agent.dealer.playerHand.size();
 			int dealer_hand_value = agent.dealer.getDealerValue();
@@ -201,69 +279,24 @@ public class App {
 			agent.info.add(player_hand_count + "#" + player_hand_value + "#" + dealer_hand_count + "#" +dealer_hand_value + "#" + isWin + "#" + agent.getName());
 			agent.update(oldState, action, agent.getState(), reward);
 			games += 1;
-			total_games++;
-		}
+			total_games++;	
+			
+		}		
 		if (!silent) {
 			long playing_end = System.currentTimeMillis();
-			double win = 100 / ((double) games / (double) total);
 			System.out.println("*******AGENT PLAY DATA*********");
 			System.out.println("Agent: " + agent.getName());
 			System.out.println("Agent specs: A:" + agent.getAlpha() + " D: " + agent.getDiscount() + " E: " + agent.epsilon);
 			System.out.println("Won " + total + " out of " + games);
 			System.out.println("Playing win " + df.format(100 / ((double) games / (double) total)) + "%");
 			System.out.println("Playing took " + df.format((playing_end - start) / 1000d) + " seconds");
+			System.out.println("Balance left: " + agent.money);
 			System.out.println("*******AGENT PLAY DATA*********\n");
-			if (win > best_win){
-				best_win = win;
-				best_agent_name = agent.getName();
-			}
 		}
-	}
-
-	@SuppressWarnings("unused")
-	public static void play(SkynetAiAgent agent) {
-
-		int total = 0;
-		int reward = 0;
-		int[] oldState;
-		int action;
-		int str;
-		int games = agent.numTraining;
-		Scanner in = new Scanner(System.in);
-
-		while (true) {
-			agent.dealer.gameBegin();
-			System.out.println("\nNew game begins!\n");
-			while (true) {
-				agent.dealer.display();
-				oldState = agent.getState();
-				action = agent.getAction(oldState);
-				System.out.println("Suggestion:" + agent.getAction(oldState));
-				System.out.println("Please Enter 1 to Hit, 2 to Stand: ");
-
-				str = in.nextInt();
-
-				if (agent.dealer.playerTurn(str)) {
-					break;
-				}
-				int[] newState = agent.getState();
-				reward = 0;
-				agent.update(oldState, str, newState, reward);
-			}
-			boolean isWin = agent.dealer.winFlag;
-			agent.dealer.display();
-			if (isWin) {
-				reward = 1;
-				total += 1;
-				System.out.println("WIN");
-			} else {
-				reward = -1;
-				System.out.println("LOSE");
-			}
-			agent.dealer.display();
-			agent.update(oldState, str, agent.getState(), reward);
-			agent.numTraining -= 1;
-			in.close();
+		double win = 100 / ((double) games / (double) total);
+		if (win > best_win){
+			best_win = win;
+			best_agent = agent;
 		}
 
 	}

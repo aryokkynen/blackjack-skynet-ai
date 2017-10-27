@@ -10,9 +10,9 @@ public class App {
 	private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 	
 	// CHANGEABLE VARIABLES
-	static int games_to_train = 50000;
-	static int games_to_exploit = 50000;
-	static int games_to_play_with_money = 500000;
+	static int games_to_train = 20000;
+	static int games_to_exploit = 5000;
+	static int games_to_play_with_money = 20000;
 	static int decks = 1;
 	static double agent_money = 1000;
 	static double default_bet = 10;
@@ -49,16 +49,18 @@ public class App {
 		 * immediate rewards
 		 */
 
-		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
+		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name || Starting sum of agent
 		//SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.4, 0.2, 0.5, games_to_train, "donkey", agent_money);
 		//train(donkey);
 		//exploit(donkey);
 		//playWithMoney(donkey, default_bet);
-		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name
+		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name || Starting sum of agent
 		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_train, "GreedySkynet", agent_money);
 		train(greedy);
 		exploit(greedy);
 		playWithMoney(greedy, default_bet);
+		greedy.saveQvaluesToCSV();
+		
 		
 		
 		// Batch testing of agents

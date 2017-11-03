@@ -318,6 +318,10 @@ public class App {
 	}
 	
 	public static void trainStockstuff(SkynetAiAgent agent, ArrayList<Stock> stockvalues) {
+		
+		// Momentum kaava
+		// Multiply that number by 100. M = (Price Today/Price Five Days Ago) x100.
+		
 		long start = System.currentTimeMillis();
 		double reward = 0;
 		double[] oldState;
@@ -337,7 +341,7 @@ public class App {
 		for (int i = 0; i < test_sample_size; i++) {
 			current_stock = stockvalues.get(i);
 			oldState = agent.getStockState(current_stock, old_stock);
-			System.out.println(Arrays.toString(oldState));
+			//System.out.println(Arrays.toString(oldState));
 			action = agent.getStockAction(oldState);
 			double[] newState = agent.getStockState(current_stock, old_stock);
 			reward = 0;
@@ -352,9 +356,9 @@ public class App {
 				losingstreak = 0;
 				agent.updateStock(oldState, action, newState, reward);
 			} else {
-				isWin = false;
-				losingstreak++;
+				isWin = false;				
 				reward = -5*losingstreak;
+				losingstreak++;
 				winstreak=0;				
 				agent.updateStock(oldState, action, newState, reward);
 			}

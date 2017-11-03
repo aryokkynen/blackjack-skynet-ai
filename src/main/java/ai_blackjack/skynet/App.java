@@ -1,7 +1,10 @@
 package ai_blackjack.skynet;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +24,7 @@ public class App {
 	static int player_wins = 0;
 	static int dealer_wins = 0;
 	static DecimalFormat df = new DecimalFormat("####0.00");
-	static boolean silent = false;
+	static boolean silent = true;
 	static double best_win = 0;
 	static SkynetAiAgent best_agent;
 
@@ -56,12 +59,14 @@ public class App {
 		//playWithMoney(donkey, default_bet);
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name || Starting sum of agent
 		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_train, "GreedySkynet", agent_money);
-		train(greedy);
-		exploit(greedy);
-		playWithMoney(greedy, default_bet);
-		greedy.saveQvaluesToCSV();
-		
-		
+		//train(greedy);
+		//exploit(greedy);
+		//playWithMoney(greedy, default_bet);
+		//greedy.saveQvaluesToCSV();
+		ArrayList<Stock> stockvalues = greedy.importData();
+		trainStockstuff(greedy, stockvalues);
+		greedy.saveStockQvaluesToCSV();
+
 		
 		// Batch testing of agents
 		/*
@@ -112,17 +117,18 @@ public class App {
 		//Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
 		
 		long end = System.currentTimeMillis();
-		System.out.println("*******************************");
-		System.out.println("Best agent, win " + df.format(best_win) + "% Name: " + best_agent.getName());
-		System.out.println("Best agent, balance: " + df.format(best_agent.getMoney()));
-		System.out.println("*******************************");
-		System.out.println("Skynet wins: " + player_wins);
-		System.out.println("Dealer wins: " + dealer_wins);
-		System.out.println("Total games: " + total_games);
-		System.out.println("Skynet win " + df.format(100 / ((double) total_games / (double) player_wins))+ "%");
-		System.out.println("Execution time is " + df.format((end - start) / 1000d) + " seconds");
-		System.out.println("*******************************");
-
+		if (!silent) {
+			System.out.println("*******************************");
+			System.out.println("Best agent, win " + df.format(best_win) + "% Name: " + best_agent.getName());
+			System.out.println("Best agent, balance: " + df.format(best_agent.getMoney()));
+			System.out.println("*******************************");
+			System.out.println("Skynet wins: " + player_wins);
+			System.out.println("Dealer wins: " + dealer_wins);
+			System.out.println("Total games: " + total_games);
+			System.out.println("Skynet win " + df.format(100 / ((double) total_games / (double) player_wins))+ "%");
+			System.out.println("Execution time is " + df.format((end - start) / 1000d) + " seconds");
+			System.out.println("*******************************");
+		}
 	}
 
 	public static void train(SkynetAiAgent agent) {
@@ -310,5 +316,58 @@ public class App {
 		}
 
 	}
+	
+	public static void trainStockstuff(SkynetAiAgent agent, ArrayList<Stock> stockvalues) {
+		long start = System.currentTimeMillis();
+		double reward = 0;
+		double[] oldState;
+		double action;
+		boolean isWin;
+		int winstreak = 0;
+		int losingstreak = 0;
+		
+		int dataset_size = stockvalues.size();
+		int test_sample_size = dataset_size - 20;
+		
+		double old_price = 0;
+		double old_pe_val = 0;
+		Stock old_stock = null;
+		Stock current_stock = null;
+		
+		for (int i = 0; i < test_sample_size; i++) {
+			current_stock = stockvalues.get(i);
+			oldState = agent.getStockState(current_stock, old_stock);
+			System.out.println(Arrays.toString(oldState));
+			action = agent.getStockAction(oldState);
+			double[] newState = agent.getStockState(current_stock, old_stock);
+			reward = 0;
+			double price = stockvalues.get(i).getShare_price();
+			double pe_val = stockvalues.get(i).getPe_value();
+			
+			
+			if (old_price < price){
+				isWin = true;				
+				reward = 10*winstreak;
+				winstreak++;
+				losingstreak = 0;
+				agent.updateStock(oldState, action, newState, reward);
+			} else {
+				isWin = false;
+				losingstreak++;
+				reward = -5*losingstreak;
+				winstreak=0;				
+				agent.updateStock(oldState, action, newState, reward);
+			}
+					
+			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
+			old_pe_val = stockvalues.get(i).getPe_value();
+			old_price = stockvalues.get(i).getShare_price();
+			old_stock = stockvalues.get(i);
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("Fiddling data took " + df.format((end - start) / 1000d) + " seconds");
+	}
+	
+	
 
 }

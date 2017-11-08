@@ -58,7 +58,7 @@ public class App {
 		//exploit(donkey);
 		//playWithMoney(donkey, default_bet);
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name || Starting sum of agent
-		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.9, 0.2, 0.9, games_to_train, "GreedySkynet", agent_money);
+		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.2, 0.3, 0.2, games_to_train, "GreedySkynet", agent_money);
 		//train(greedy);
 		//exploit(greedy);
 		//playWithMoney(greedy, default_bet);
@@ -327,46 +327,50 @@ public class App {
 		double[] oldState;
 		double action;
 		boolean isWin;
-		int winstreak = 0;
-		int losingstreak = 0;
-		
-		int dataset_size = stockvalues.size();
-		int test_sample_size = dataset_size - 20;
+		int momentum=0;
+		int old_momemtum =0;
 		
 		double old_price = 0;
 		double old_pe_val = 0;
 		Stock old_stock = null;
 		Stock current_stock = null;
 		
-		for (int i = 0; i < test_sample_size; i++) {
+		for (int i = 0; i < stockvalues.size(); i++) {
+			if(old_price == 0) {
+				old_price = stockvalues.get(i).getShare_price();
+			}
 			current_stock = stockvalues.get(i);
-			oldState = agent.getStockState(current_stock, old_stock);
-			//System.out.println(Arrays.toString(oldState));
-			action = agent.getStockAction(oldState);
-			double[] newState = agent.getStockState(current_stock, old_stock);
-			reward = 0;
 			double price = stockvalues.get(i).getShare_price();
+			momentum = (int) ((price/old_price)*100);			
+			current_stock.setMomentum(momentum);			
+			oldState = agent.getStockState(current_stock, old_stock);
+			action = agent.getStockAction(oldState);
+						
 			double pe_val = stockvalues.get(i).getPe_value();
+			double[] newState = agent.getStockState(current_stock, old_stock);
+			action = agent.getStockAction(oldState);
 			
-			
-			if (old_price < price){
-				isWin = true;				
-				reward = 10*winstreak;
-				winstreak++;
-				losingstreak = 0;
+			if (old_momemtum < momentum){
+				isWin = false;				
+				reward = old_momemtum-momentum;
 				agent.updateStock(oldState, action, newState, reward);
 			} else {
-				isWin = false;				
-				reward = -5*losingstreak;
-				losingstreak++;
-				winstreak=0;				
+				isWin = true;				
+				reward = momentum-old_momemtum;				
 				agent.updateStock(oldState, action, newState, reward);
+			}
+			
+			if (action == 2) { // Print stock data when ai decide its not worth buying
+				System.out.println("OLD: " +old_stock + " VS CURRENT:" +current_stock);
 			}
 					
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
 			old_pe_val = stockvalues.get(i).getPe_value();
 			old_price = stockvalues.get(i).getShare_price();
 			old_stock = stockvalues.get(i);
+			old_stock.setMomentum(momentum);
+			old_momemtum = (int) ((price/old_price)*100);
+			
 		}
 		long end = System.currentTimeMillis();
 		System.out.println("Fiddling data took " + df.format((end - start) / 1000d) + " seconds");

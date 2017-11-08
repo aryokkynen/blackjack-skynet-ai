@@ -5,12 +5,17 @@ public class Stock {
 	String date;
 	double share_price;
 	double pe_value;
-	public Stock(String date, double share_price, double pe_value) {
+	int momentum;
+
+
+	public Stock(String date, double share_price, double pe_value, int momentum) {
 		super();
 		this.date = date;
 		this.share_price = share_price;
 		this.pe_value = pe_value;
+		this.momentum = momentum;
 	}
+
 	public Stock() {
 		super();
 		
@@ -35,9 +40,17 @@ public class Stock {
 		this.pe_value = pe_value;
 	}
 	
+	public int getMomentum() {
+		return momentum;
+	}
+	public void setMomentum(int momentum) {
+		this.momentum = momentum;
+	}
+	
 	@Override
 	public String toString() {
-		return "Stock [date=" + date + ", share_price=" + share_price + ", pe_value=" + pe_value + "]";
+		return "Stock [date=" + date + ", share_price=" + share_price + ", pe_value=" + pe_value + ", momentum="
+				+ momentum + "]";
 	}
 	
 	

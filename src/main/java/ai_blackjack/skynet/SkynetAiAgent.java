@@ -64,9 +64,9 @@ public class SkynetAiAgent {
 		
 		try {
 			state[0] = current.getShare_price();
-			state[1] = current.getPe_value();
+			state[1] = current.getMomentum();
 			state[2] = old.getShare_price();
-			state[3] = old.getPe_value();
+			state[3] = old.getMomentum();
 		} catch (Exception e) {
 			state[2] = 0;
 			state[3] = 0;
@@ -330,7 +330,7 @@ public class SkynetAiAgent {
 				String date = asdf[0];
 				double price = Double.parseDouble(asdf[1]);
 				double pe_value = Double.parseDouble(asdf[2]);
-				Stock s = new Stock(date, price, pe_value);
+				Stock s = new Stock(date, price, pe_value, 0);
 				stockList.add(s);
 
 			}

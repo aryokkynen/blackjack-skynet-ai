@@ -14,6 +14,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+
 public class StockGui {
 
 	private JFrame frame;
@@ -104,6 +109,7 @@ public class StockGui {
 		scroll_table.setVisible(true);
 		tabbedPane.add("Q-values & Misc data", QvalueTAble);
 		
+
 		
 		p.add(btnSelectFile);
 		btnSelectFile.addActionListener(new ActionListener() {
@@ -114,7 +120,20 @@ public class StockGui {
 
 				try {
 					openfile.FilePicker(model, model2, model3);
-
+					
+					 JFreeChart lineChart = ChartFactory.createLineChart(
+					         "Networth",
+					         "Date","Networth",
+					         OpenFile.createDataset(),
+					         PlotOrientation.VERTICAL,
+					         true,true,false);
+					 
+					 lineChart.getCategoryPlot().getRangeAxis().setLowerBound(8000);
+					 
+					      ChartPanel chartPanel = new ChartPanel( lineChart );
+							tabbedPane.add("Charts & shits", chartPanel);
+					chartPanel.setMouseZoomable(true);;
+					
 					frame.setBounds(100, 100, 450, 462);
 
 				} catch (Exception e1) {

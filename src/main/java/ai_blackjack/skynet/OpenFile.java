@@ -8,6 +8,8 @@ import java.util.Scanner;
 import javax.swing.JFileChooser;
 import javax.swing.table.DefaultTableModel;
 
+import org.jfree.data.category.DefaultCategoryDataset;
+
 public class OpenFile {
 	JFileChooser filechooser = new JFileChooser();
 	ArrayList<String> Data = new ArrayList<String>();
@@ -17,6 +19,7 @@ public class OpenFile {
 
 	public void FilePicker(DefaultTableModel model, DefaultTableModel model2, DefaultTableModel model3)
 			throws Exception {
+		filechooser.setCurrentDirectory(new java.io.File("."));
 		if (filechooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			Taulu = model2;
 			Qtaulu = model3;
@@ -60,4 +63,18 @@ public class OpenFile {
 				stock_count, networth });
 
 	}
+	  public static DefaultCategoryDataset createDataset( ) {
+	      DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
+	      double networth = 0;
+	      String input ="";
+	      for (int i = 0; i < Qtaulu.getRowCount(); i++) {	  
+	    	  input = Qtaulu.getValueAt(i,9).toString();
+	    	  String[]inputArray = input.split(",");	  
+	    	  networth = Double.parseDouble(inputArray[0]);
+	    	 dataset.addValue(networth, "Networth", Integer.toString(i));
+		}
+	     
+	      return dataset;
+	   }
+	
 }

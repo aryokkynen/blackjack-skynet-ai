@@ -54,10 +54,10 @@ public class OpenFile {
 
 	}
 
-	public static void addQLine(double old_price, double old_pe_val, double price, double pe_val, boolean isWin,
-			String name, int momemtum, String ai_action, String money, int stock_count) {
-		Qtaulu.addRow(new Object[] { old_price, old_pe_val, price, pe_val, isWin, name, momemtum, ai_action, money,
-				stock_count });
+	public static void addQLine(double old_price, double old_pe_val, double price, double pe_val,
+			String name, int momemtum, String ai_action, String money, int stock_count, String networth) {
+		Qtaulu.addRow(new Object[] { old_price, old_pe_val, price, pe_val, name, momemtum, ai_action, money,
+				stock_count, networth });
 
 	}
 }

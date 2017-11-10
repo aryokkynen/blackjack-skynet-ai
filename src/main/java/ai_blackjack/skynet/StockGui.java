@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -45,13 +46,16 @@ public class StockGui {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
+		frame = new JFrame("Skynet stock thing");
 		frame.setBounds(100, 100, 450, 461);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JPanel p = new JPanel();
 
-		JSplitPane splitPane = new JSplitPane();
-		frame.getContentPane().add(splitPane, BorderLayout.NORTH);
+		//JSplitPane splitPane = new JSplitPane();
+		frame.getContentPane().add(p, BorderLayout.NORTH);
 
+		
+		
 		DefaultTableModel model = new DefaultTableModel();
 		table = new JTable(model);
 
@@ -71,12 +75,12 @@ public class StockGui {
 		model3.addColumn("Old pe-value");
 		model3.addColumn("Price");
 		model3.addColumn("Pe-value");
-		model3.addColumn("IsWin");
 		model3.addColumn("Agent name");
 		model3.addColumn("Momemtum");
 		model3.addColumn("Ai Action");
 		model3.addColumn("Money");
 		model3.addColumn("Stock Count");
+		model3.addColumn("Networth");
 
 		JButton btnSelectFile = new JButton("Open file");
 
@@ -98,9 +102,10 @@ public class StockGui {
 		JScrollPane QvalueTAble = new JScrollPane(ThirdTable);
 		scroll_table.setBounds(5, 10, 300, 150);
 		scroll_table.setVisible(true);
-		tabbedPane.add("Q-values", QvalueTAble);
-
-		splitPane.setLeftComponent(btnSelectFile);
+		tabbedPane.add("Q-values & Misc data", QvalueTAble);
+		
+		
+		p.add(btnSelectFile);
 		btnSelectFile.addActionListener(new ActionListener() {
 
 			@Override
@@ -118,9 +123,11 @@ public class StockGui {
 
 			}
 		});
-
-		JButton btnDoStuffAnd = new JButton("Do stuff and save");
+/*
+		//JButton btnDoStuffAnd = new JButton("Do stuff and save");
+		btnDoStuffAnd.setEnabled(false);
 		splitPane.setRightComponent(btnDoStuffAnd);
+		
 
 		btnDoStuffAnd.addActionListener(new ActionListener() {
 
@@ -129,7 +136,7 @@ public class StockGui {
 				System.out.println("lööl");
 
 			}
-		});
+		});*/
 	}
 
 }

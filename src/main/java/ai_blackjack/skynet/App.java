@@ -356,7 +356,7 @@ public class App {
 		boolean isWin;
 		int momentum=0;
 		int old_momemtum =0;
-		String ai_action = "None";
+		
 		double old_price = 0;
 		double old_pe_val = 0;
 		Stock old_stock = null;
@@ -364,6 +364,7 @@ public class App {
 		double starting_money = agent.getMoney();
 		OpenFile.addLine("Agent starting money: " + df.format(starting_money) + "€");
 		for (int i = 0; i < stockvalues.size(); i++) {
+			String ai_action = "None";
 			//agent.setMoney(agent.getMoney() + 100);
 			if(old_price == 0) {
 				old_price = stockvalues.get(i).getShare_price();
@@ -431,8 +432,8 @@ public class App {
 				
 			}
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
-
-			OpenFile.addQLine(old_price,old_pe_val,price,pe_val, isWin,agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount());
+			double current_networth = agent.getMoney() + (stockvalues.get(i).getShare_price()) * agent.getStockCount();
+			OpenFile.addQLine(old_price,old_pe_val,price,pe_val, agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount(), df.format(current_networth));
 			old_pe_val = stockvalues.get(i).getPe_value();
 			old_price = stockvalues.get(i).getShare_price();
 			old_stock = stockvalues.get(i);

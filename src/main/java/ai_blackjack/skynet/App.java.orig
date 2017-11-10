@@ -1,8 +1,10 @@
 package ai_blackjack.skynet;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -356,13 +358,13 @@ public class App {
 		boolean isWin;
 		int momentum=0;
 		int old_momemtum =0;
-		String ai_action = "None";
+		
 		double old_price = 0;
 		double old_pe_val = 0;
 		Stock old_stock = null;
 		Stock current_stock = null;
 		double starting_money = agent.getMoney();
-		OpenFile.addLine("Agent starting money: " + df.format(starting_money) + "€");
+		System.out.println("Agent starting money: " + df.format(starting_money) + "€");
 		for (int i = 0; i < stockvalues.size(); i++) {
 			//agent.setMoney(agent.getMoney() + 100);
 			if(old_price == 0) {
@@ -390,49 +392,42 @@ public class App {
 			}
 			
 			int how_many_to_sell = 0;
-			
 			if (action == 2) { // Sell
 				if(momentum +3 >= old_momemtum && stockvalues.get(i).getShare_price() > old_price){
 					how_many_to_sell = (int) (agent.getStockCount() * 0.5);
 					sell++;
-					ai_action ="Sell";
 				}
 				
 				else if (stockvalues.get(i).getShare_price() > old_price){
 					how_many_to_sell = (int) (agent.getStockCount() * 0.1);
 					sell++;
-					ai_action ="Sell";
 				}
 				
 				double money_from_selling = sellStocks(how_many_to_sell, stockvalues.get(i).getShare_price());
 				agent.setMoney(agent.getMoney()+money_from_selling);
 				agent.setStockCount(agent.getStockCount() - how_many_to_sell);
 				
+				
 			}
-			
 			double usable_money = 0;
-			
 			if (action == 1) {// buy stocks 
 				if(old_momemtum >= momentum-3 && stockvalues.get(i).getShare_price() < old_price){
 					usable_money = agent.getMoney() * 0.5;
 					buy++;
-					ai_action = "Buy";
-
+					
+<<<<<<< HEAD
 				} else if (stockvalues.get(i).getShare_price() < old_price) {
 					usable_money = agent.getMoney() * 0.1;
 					buy++;
-					ai_action = "Buy";
 				}
-				
-				int ammount_to_buy = buyStocks(usable_money,stockvalues.get(i).getShare_price());
-				agent.setStockCount(agent.getStockCount() + ammount_to_buy);
-				double purchase_value = ammount_to_buy * stockvalues.get(i).getShare_price();		
-				agent.setMoney(agent.getMoney()-purchase_value);
+				agent.setStockCount(agent.getStockCount() + buyStocks(usable_money,stockvalues.get(i).getShare_price()));
+				agent.setMoney(agent.getMoney()-usable_money);
 				
 			}
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
-
-			OpenFile.addQLine(old_price,old_pe_val,price,pe_val, isWin,agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount());
+=======
+			OpenFile.addQLine(old_price,old_pe_val,price,pe_val, isWin,agent.getName());
+>>>>>>> a9736786f0c19f1dd60c7ff32e23b7a94cfca442
 			old_pe_val = stockvalues.get(i).getPe_value();
 			old_price = stockvalues.get(i).getShare_price();
 			old_stock = stockvalues.get(i);
@@ -441,14 +436,14 @@ public class App {
 			
 		}
 		double nw = agent.getMoney() + (stockvalues.get(stockvalues.size()-1).getShare_price()) * agent.getStockCount();
-		OpenFile.addLine("Agent Money: " + df.format(agent.getMoney()) + "€");
-		OpenFile.addLine("Agent stock count: " + agent.getStockCount());
-		OpenFile.addLine("Agent stock worth: " + df.format((stockvalues.get(stockvalues.size()-1).getShare_price()) * agent.getStockCount()) + "€");
-		OpenFile.addLine("Agent networth: " + df.format(nw) + "€");
-		OpenFile.addLine("Profit or loss: " + df.format(nw - starting_money) + "€");
-		OpenFile.addLine("Buy events: " + buy);
-		OpenFile.addLine("Sell events: " + sell);
-		OpenFile.addLine("No action: " + (stockvalues.size() - buy - sell));
+		System.out.println("Agent Money: " + df.format(agent.getMoney()) + "€");
+		System.out.println("Agent stock count: " + agent.getStockCount());
+		System.out.println("Agent stock worth: " + df.format((stockvalues.get(stockvalues.size()-1).getShare_price()) * agent.getStockCount()) + "€");
+		System.out.println("Agent networth: " + df.format(nw) + "€");
+		System.out.println("Profit or loss: " + df.format(nw - starting_money) + "€");
+		System.out.println("Buy events: " + buy);
+		System.out.println("Sell events: " + sell);
+		System.out.println("No action: " + (stockvalues.size() - buy - sell));
 		long end = System.currentTimeMillis();
 		OpenFile.addLine("Fiddling data took " + df.format((end - start) / 1000d) + " seconds");
 	}
@@ -461,7 +456,5 @@ public class App {
 	public static double sellStocks (int count, double stock_prize) {
 		return count * stock_prize;
 	}
-	
-
 
 }

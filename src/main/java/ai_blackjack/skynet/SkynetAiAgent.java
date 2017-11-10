@@ -309,7 +309,7 @@ public class SkynetAiAgent {
 		return this.money;
 	}
 
-	public ArrayList<Stock> importData() {
+	/*public ArrayList<Stock> importData() {
 
 		String fileName = "Evli_pe.txt";
 		ArrayList<Stock> stockList = new ArrayList<Stock>();
@@ -341,6 +341,6 @@ public class SkynetAiAgent {
 		}
 
 		return stockList;
-	}
+	}*/
 
 }

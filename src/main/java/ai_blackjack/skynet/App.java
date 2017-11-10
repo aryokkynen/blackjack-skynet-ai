@@ -17,7 +17,7 @@ public class App {
 	static int games_to_exploit = 5000;
 	static int games_to_play_with_money = 20000;
 	static int decks = 1;
-	static double agent_money = 1000;
+	static double agent_money = 10000;
 	static double default_bet = 10;
 	// DO NOT CHANGE THESE
 	static int total_games = 0;
@@ -27,6 +27,10 @@ public class App {
 	static boolean silent = true;
 	static double best_win = 0;
 	static SkynetAiAgent best_agent;
+	static int buy = 0;
+	static int sell = 0;
+	static int no_action = 0;
+	
 
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
@@ -334,8 +338,10 @@ public class App {
 		double old_pe_val = 0;
 		Stock old_stock = null;
 		Stock current_stock = null;
-		
+		double starting_money = agent.getMoney();
+		System.out.println("Agent starting money: " + df.format(starting_money) + "€");
 		for (int i = 0; i < stockvalues.size(); i++) {
+			//agent.setMoney(agent.getMoney() + 100);
 			if(old_price == 0) {
 				old_price = stockvalues.get(i).getShare_price();
 			}
@@ -360,10 +366,38 @@ public class App {
 				agent.updateStock(oldState, action, newState, reward);
 			}
 			
-			if (action == 2) { // Print stock data when ai decide its not worth buying
-				System.out.println("OLD: " +old_stock + " VS CURRENT:" +current_stock);
+			int how_many_to_sell = 0;
+			if (action == 2) { // Sell
+				if(momentum +3 >= old_momemtum && stockvalues.get(i).getShare_price() > old_price){
+					how_many_to_sell = (int) (agent.getStockCount() * 0.5);
+					sell++;
+				}
+				
+				else if (stockvalues.get(i).getShare_price() > old_price){
+					how_many_to_sell = (int) (agent.getStockCount() * 0.1);
+					sell++;
+				}
+				
+				double money_from_selling = sellStocks(how_many_to_sell, stockvalues.get(i).getShare_price());
+				agent.setMoney(agent.getMoney()+money_from_selling);
+				agent.setStockCount(agent.getStockCount() - how_many_to_sell);
+				
+				
 			}
+			double usable_money = 0;
+			if (action == 1) {// buy stocks 
+				if(old_momemtum >= momentum-3 && stockvalues.get(i).getShare_price() < old_price){
+					usable_money = agent.getMoney() * 0.5;
+					buy++;
 					
+				} else if (stockvalues.get(i).getShare_price() < old_price) {
+					usable_money = agent.getMoney() * 0.1;
+					buy++;
+				}
+				agent.setStockCount(agent.getStockCount() + buyStocks(usable_money,stockvalues.get(i).getShare_price()));
+				agent.setMoney(agent.getMoney()-usable_money);
+				
+			}
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
 			old_pe_val = stockvalues.get(i).getPe_value();
 			old_price = stockvalues.get(i).getShare_price();
@@ -372,10 +406,26 @@ public class App {
 			old_momemtum = (int) ((price/old_price)*100);
 			
 		}
+		double nw = agent.getMoney() + (stockvalues.get(stockvalues.size()-1).getShare_price()) * agent.getStockCount();
+		System.out.println("Agent Money: " + df.format(agent.getMoney()) + "€");
+		System.out.println("Agent stock count: " + agent.getStockCount());
+		System.out.println("Agent stock worth: " + df.format((stockvalues.get(stockvalues.size()-1).getShare_price()) * agent.getStockCount()) + "€");
+		System.out.println("Agent networth: " + df.format(nw) + "€");
+		System.out.println("Profit or loss: " + df.format(nw - starting_money) + "€");
+		System.out.println("Buy events: " + buy);
+		System.out.println("Sell events: " + sell);
+		System.out.println("No action: " + (stockvalues.size() - buy - sell));
 		long end = System.currentTimeMillis();
 		System.out.println("Fiddling data took " + df.format((end - start) / 1000d) + " seconds");
 	}
 	
+	public static int buyStocks(double money, double stock_prize) {		
+		
+		return (int) (money / stock_prize);
+	}
 	
+	public static double sellStocks (int count, double stock_prize) {
+		return count * stock_prize;
+	}
 
 }

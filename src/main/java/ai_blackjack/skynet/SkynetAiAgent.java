@@ -29,6 +29,7 @@ public class SkynetAiAgent {
 	Dealer dealer;
 	HashMap<Pair, Double> qvalues;
 	List<Object> info;
+	int stock_count;
 	static DecimalFormat df = new DecimalFormat("####0.00");
 	String[] HEADERS = { "STATE", "QVALUE", "AI SUGGESTED ACTION", "PLAYER HAND SIZE", "PLAYER HAND VALUE",
 			"DEALER HAND SIZE", "DEALER HAND VALUE", "GAME RESULT", "SKYNET HANDLE" };
@@ -45,6 +46,7 @@ public class SkynetAiAgent {
 		this.qvalues = new HashMap<Pair, Double>();
 		this.info = new ArrayList<>();
 		this.money = m;
+		this.stock_count = 0;
 	}
 
 	public int[] getState() {
@@ -68,8 +70,8 @@ public class SkynetAiAgent {
 			state[2] = old.getShare_price();
 			state[3] = old.getMomentum();
 		} catch (Exception e) {
-			state[2] = 0;
-			state[3] = 0;
+			state[2] = 8.37;
+			state[3] = 100;
 		}
 
 		return state;
@@ -311,7 +313,7 @@ public class SkynetAiAgent {
 
 	public ArrayList<Stock> importData() {
 
-		String fileName = "Evli_pe.txt";
+		String fileName = "Evli_pe_2016-2017.txt";
 		ArrayList<Stock> stockList = new ArrayList<Stock>();
 		List<?> list;
 
@@ -343,4 +345,11 @@ public class SkynetAiAgent {
 		return stockList;
 	}
 
+	public void setStockCount(int count) {
+		this.stock_count = count;
+	}
+
+	public int getStockCount() {
+		return this.stock_count;
+	}
 }

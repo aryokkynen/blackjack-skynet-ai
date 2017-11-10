@@ -33,7 +33,8 @@ public class App {
 	
 
 	public static void main(String[] args) throws IOException {
-		long start = System.currentTimeMillis();
+		
+		//long start = System.currentTimeMillis();
 		
 		/*
 		 * Modified version of
@@ -41,7 +42,7 @@ public class App {
 		 */
 
 		// ALL or OFF
-		LOGGER.setLevel(Level.OFF);
+		//LOGGER.setLevel(Level.OFF);
 
 		/*
 		 * Alpha = Learning rate, set between 0 and 1. Setting it to 0 means
@@ -62,14 +63,14 @@ public class App {
 		//exploit(donkey);
 		//playWithMoney(donkey, default_bet);
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name || Starting sum of agent
-		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.2, 0.3, 0.2, games_to_train, "GreedySkynet", agent_money);
+	//	SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.2, 0.3, 0.2, games_to_train, "GreedySkynet", agent_money);
 		//train(greedy);
 		//exploit(greedy);
 		//playWithMoney(greedy, default_bet);
 		//greedy.saveQvaluesToCSV();
-		ArrayList<Stock> stockvalues = greedy.importData();
-		trainStockstuff(greedy, stockvalues);
-		greedy.saveStockQvaluesToCSV();
+		//ArrayList<Stock> stockvalues = greedy.importData();
+		//trainStockstuff(greedy, stockvalues);
+		//greedy.saveStockQvaluesToCSV();
 
 		
 		// Batch testing of agents
@@ -119,7 +120,7 @@ public class App {
 
 		//Pair dpairs=(Pair) donkey.qvalues.keySet().toArray()[50];
 		//Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
-		
+		/*
 		long end = System.currentTimeMillis();
 		if (!silent) {
 			System.out.println("*******************************");
@@ -132,6 +133,30 @@ public class App {
 			System.out.println("Skynet win " + df.format(100 / ((double) total_games / (double) player_wins))+ "%");
 			System.out.println("Execution time is " + df.format((end - start) / 1000d) + " seconds");
 			System.out.println("*******************************");
+		}*/
+	}
+	public static void doShit(ArrayList<Stock> stockvalues) {
+		long start = System.currentTimeMillis();
+		LOGGER.setLevel(Level.OFF);
+
+		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.2, 0.3, 0.2, games_to_train, "GreedySkynet", agent_money);
+
+		//ArrayList<Stock> stockvalues = greedy.importData();
+		trainStockstuff(greedy, stockvalues);
+		//greedy.saveStockQvaluesToCSV();
+
+		long end = System.currentTimeMillis();
+		if (!silent) {
+			OpenFile.addLine("*******************************");
+			OpenFile.addLine("Best agent, win " + df.format(best_win) + "% Name: " + best_agent.getName());
+			OpenFile.addLine("Best agent, balance: " + df.format(best_agent.getMoney()));
+			OpenFile.addLine("*******************************");
+			OpenFile.addLine("Skynet wins: " + player_wins);
+			OpenFile.addLine("Dealer wins: " + dealer_wins);
+			OpenFile.addLine("Total games: " + total_games);
+			OpenFile.addLine("Skynet win " + df.format(100 / ((double) total_games / (double) player_wins))+ "%");
+			OpenFile.addLine("Execution time is " + df.format((end - start) / 1000d) + " seconds");
+			OpenFile.addLine("*******************************");
 		}
 	}
 
@@ -390,6 +415,7 @@ public class App {
 					usable_money = agent.getMoney() * 0.5;
 					buy++;
 					
+<<<<<<< HEAD
 				} else if (stockvalues.get(i).getShare_price() < old_price) {
 					usable_money = agent.getMoney() * 0.1;
 					buy++;
@@ -399,6 +425,9 @@ public class App {
 				
 			}
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
+=======
+			OpenFile.addQLine(old_price,old_pe_val,price,pe_val, isWin,agent.getName());
+>>>>>>> a9736786f0c19f1dd60c7ff32e23b7a94cfca442
 			old_pe_val = stockvalues.get(i).getPe_value();
 			old_price = stockvalues.get(i).getShare_price();
 			old_stock = stockvalues.get(i);
@@ -416,7 +445,7 @@ public class App {
 		System.out.println("Sell events: " + sell);
 		System.out.println("No action: " + (stockvalues.size() - buy - sell));
 		long end = System.currentTimeMillis();
-		System.out.println("Fiddling data took " + df.format((end - start) / 1000d) + " seconds");
+		OpenFile.addLine("Fiddling data took " + df.format((end - start) / 1000d) + " seconds");
 	}
 	
 	public static int buyStocks(double money, double stock_prize) {		

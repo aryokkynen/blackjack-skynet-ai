@@ -2,23 +2,18 @@ package ai_blackjack.skynet;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 public class SkynetAiAgent {
 
-	Stock stock;
 	int count = 0;
 	double epsilon;
 	double discount;
@@ -29,14 +24,14 @@ public class SkynetAiAgent {
 	Dealer dealer;
 	HashMap<Pair, Double> qvalues;
 	List<Object> info;
-	int stock_count;
-	static DecimalFormat df = new DecimalFormat("####0.00");
-	String[] HEADERS = { "STATE", "QVALUE", "AI SUGGESTED ACTION", "PLAYER HAND SIZE", "PLAYER HAND VALUE",
-			"DEALER HAND SIZE", "DEALER HAND VALUE", "GAME RESULT", "SKYNET HANDLE" };
-	String[] STOCK_HEADERS = { "STATE", "QVALUE", "AI SUGGESTED ACTION", "OLD STOCK PRICE", "OLD P/E",
-			"CURRENT STOCK PRIZE", "CURRENT P/E", "BUY/SELL", "SKYNET HANDLE" };
 
-	public SkynetAiAgent(int numDecks, double e, double d, double a, int numTraining, String name, double m) {
+	static DecimalFormat df = new DecimalFormat("####0.00");
+	String[] HEADERS = { "STATE", "QVALUE", "AI SUGGESTED ACTION",
+			"PLAYER HAND SIZE", "PLAYER HAND VALUE", "DEALER HAND SIZE",
+			"DEALER HAND VALUE", "GAME RESULT", "SKYNET HANDLE" };
+
+	public SkynetAiAgent(int numDecks, double e, double d, double a,
+			int numTraining, String name, double m) {
 		this.name = name;
 		this.epsilon = e;
 		this.discount = d;
@@ -46,7 +41,6 @@ public class SkynetAiAgent {
 		this.qvalues = new HashMap<Pair, Double>();
 		this.info = new ArrayList<>();
 		this.money = m;
-		this.stock_count = 0;
 	}
 
 	public int[] getState() {
@@ -58,26 +52,6 @@ public class SkynetAiAgent {
 		return state;
 	}
 
-	public double[] getStockState(Stock current, Stock old) {
-		
-
-
-		double[] state = new double[4];
-		
-		try {
-			state[0] = current.getShare_price();
-			state[1] = current.getMomentum();
-			state[2] = old.getShare_price();
-			state[3] = old.getMomentum();
-		} catch (Exception e) {
-			state[2] = 8.37;
-			state[3] = 100;
-		}
-
-		return state;
-	}
-	
-	
 	public int getAction(int[] state) {
 		int[] legalActions = this.getLegalActions(state);
 
@@ -90,24 +64,11 @@ public class SkynetAiAgent {
 		}
 		return this.getPolicy(state);
 	}
-	
-	public double getStockAction(double[] state) {
-		double[] legalActions = this.getLegalStockActions(state);
-
-		// get next next boolean value
-		if (Math.random() > this.epsilon) {
-			Random randomG = new Random();
-			int index = randomG.nextInt(2);
-			int action = (int) legalActions[index];
-			return action;
-		}
-		return this.getStockPolicy(state);
-	}
-	
 
 	public void printQvalues() {
 
-		qvalues.forEach((pair, reward) -> System.out.println("State : " + Arrays.toString(pair.state) + " qvalue : "
+		qvalues.forEach((pair, reward) -> System.out.println("State : "
+				+ Arrays.toString(pair.state) + " qvalue : "
 				+ df.format(reward) + " AI action(1Hit/2Stay): " + pair.action));
 		System.out.println("Hashmap size: " + qvalues.size());
 	}
@@ -115,14 +76,17 @@ public class SkynetAiAgent {
 	public void saveQvaluesToCSV() throws IOException {
 
 		FileWriter out = new FileWriter("Qvalues_" + getName() + ".csv");
-		try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS))) {
+		try (CSVPrinter printer = new CSVPrinter(out,
+				CSVFormat.DEFAULT.withHeader(HEADERS))) {
 			qvalues.forEach((pair, reward) -> {
 
 				try {
 					if (count < info.size()) { // Print end of game info
-						printer.printRecord(Arrays.toString(pair.state), reward, pair.action, info.get(count));
+						printer.printRecord(Arrays.toString(pair.state),
+								reward, pair.action, info.get(count));
 					} else { // Print only state updates
-						printer.printRecord(Arrays.toString(pair.state), reward, pair.action);
+						printer.printRecord(Arrays.toString(pair.state),
+								reward, pair.action);
 					}
 					count++;
 				} catch (Exception e) {
@@ -134,30 +98,6 @@ public class SkynetAiAgent {
 		}
 
 	}
-	
-	public void saveStockQvaluesToCSV() throws IOException {
-
-		FileWriter out = new FileWriter("StockQvalues_" + getName() + ".csv");
-		try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(STOCK_HEADERS))) {
-			qvalues.forEach((pair, reward) -> {
-
-				try {
-					if (count < info.size()) { // Print end of game info
-						printer.printRecord(Arrays.toString(pair.stateDouble), reward, pair.action_double, info.get(count));
-					} else { // Print only state updates
-						printer.printRecord(Arrays.toString(pair.stateDouble), reward, pair.action_double);
-					}
-					count++;
-				} catch (Exception e) {
-
-				}
-
-			});
-			System.out.println("Data saved to CSV file");
-		}
-
-	}
-	
 
 	public int getPolicy(int[] state) {
 
@@ -167,22 +107,6 @@ public class SkynetAiAgent {
 		int[] legalActions = this.getLegalActions(state);
 		for (int i = 0; i < 2; i++) {
 			actionValue = this.getQValue(state, legalActions[i]);
-			if (maxValue < actionValue) {
-				maxValue = actionValue;
-				maxAction = legalActions[i];
-			}
-		}
-		return maxAction;
-	}
-	
-	public double getStockPolicy(double[] state) {
-
-		double maxValue = -99999.0;
-		double maxAction = 0;
-		double actionValue;
-		double[] legalActions = this.getLegalStockActions(state);
-		for (int i = 0; i < 2; i++) {
-			actionValue = this.getStockQValue(state, legalActions[i]);
 			if (maxValue < actionValue) {
 				maxValue = actionValue;
 				maxAction = legalActions[i];
@@ -207,35 +131,10 @@ public class SkynetAiAgent {
 		}
 		return maxValue;
 	}
-	
-	@SuppressWarnings("unused")
-	public double getStockValue(double[] state) {
-
-		double maxValue = -99999.0;
-		double maxAction = 0;
-		double actionValue;
-		double[] legalActions = this.getLegalStockActions(state);
-		for (int i = 0; i < 2; i++) {
-			actionValue = this.getStockQValue(state, legalActions[i]);
-			if (maxValue < actionValue) {
-				maxValue = actionValue;
-				maxAction = legalActions[i];
-			}
-		}
-		return maxValue;
-	}
 
 	public double getQValue(int[] state, int action) {
 
 		Pair pair = new Pair(state, action);
-		if (this.qvalues.get(pair) == null)
-			return 0.0;
-		return this.qvalues.get(pair);
-	}
-	
-	public double getStockQValue(double[] state, double legalActions) {
-
-		Pair pair = new Pair(state, legalActions);
 		if (this.qvalues.get(pair) == null)
 			return 0.0;
 		return this.qvalues.get(pair);
@@ -249,25 +148,11 @@ public class SkynetAiAgent {
 		return a;
 	}
 
-	public double[] getLegalStockActions(double[] state) {
-
-		double[] a = new double[2];
-		a[0] = 1;
-		a[1] = 2;
-		return a;
-	}
-	
-	
 	public void update(int[] state, int action, int[] nextState, int reward) {
 		double qvalue = this.getQValue(state, action)
-				+ this.alpha * (reward + this.discount * this.getValue(nextState) - this.getQValue(state, action));
-		Pair pair = new Pair(state, action);
-		this.qvalues.put(pair, qvalue);
-	}
-	
-	public void updateStock(double[] state, double action, double[] nextState, double reward) {
-		double qvalue = this.getStockQValue(state, action)
-				+ this.alpha * (reward + this.discount * this.getStockValue(nextState) - this.getStockQValue(state, action));
+				+ this.alpha
+				* (reward + this.discount * this.getValue(nextState) - this
+						.getQValue(state, action));
 		Pair pair = new Pair(state, action);
 		this.qvalues.put(pair, qvalue);
 	}
@@ -312,45 +197,4 @@ public class SkynetAiAgent {
 		return this.money;
 	}
 
-	public ArrayList<Stock> importData() {
-
-		String fileName = "Evli_pe_2016-2017.txt";
-		ArrayList<Stock> stockList = new ArrayList<Stock>();
-		List<?> list;
-
-		try {
-			try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
-
-				list = stream.collect(Collectors.toList());
-
-			}
-
-			for (int i = 0; i < list.size(); i++) {
-
-				String temp = list.get(i).toString();
-
-				String[] asdf = temp.split(";");
-				String date = asdf[0];
-				double price = Double.parseDouble(asdf[1]);
-				double pe_value = Double.parseDouble(asdf[2]);
-				Stock s = new Stock(date, price, pe_value, 0);
-				stockList.add(s);
-
-			}
-
-		} catch (IOException e) {
-
-			e.printStackTrace();
-		}
-
-		return stockList;
-	}
-
-	public void setStockCount(int count) {
-		this.stock_count = count;
-	}
-
-	public int getStockCount() {
-		return this.stock_count;
-	}
 }

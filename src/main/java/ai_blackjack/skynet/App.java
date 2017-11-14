@@ -3,6 +3,7 @@ package ai_blackjack.skynet;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,14 +26,12 @@ public class App {
 	static boolean silent = true;
 	static double best_win = 0;
 	static SkynetAiAgent best_agent;
-	static int buy = 0;
-	static int sell = 0;
-	static int no_action = 0;
+	
 	
 
 	public static void main(String[] args) throws IOException {
 		
-		//long start = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		
 		/*
 		 * Modified version of
@@ -40,7 +39,7 @@ public class App {
 		 */
 
 		// ALL or OFF
-		//LOGGER.setLevel(Level.OFF);
+		LOGGER.setLevel(Level.OFF);
 
 		/*
 		 * Alpha = Learning rate, set between 0 and 1. Setting it to 0 means
@@ -56,19 +55,17 @@ public class App {
 		 */
 
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name || Starting sum of agent
-		//SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.4, 0.2, 0.5, games_to_train, "donkey", agent_money);
-		//train(donkey);
-		//exploit(donkey);
-		//playWithMoney(donkey, default_bet);
+		SkynetAiAgent donkey = new SkynetAiAgent(decks, 0.4, 0.2, 0.5, games_to_train, "donkey", agent_money);
+		train(donkey);
+		exploit(donkey);
+		playWithMoney(donkey, default_bet);
 		// Decks || Epsilon || Discount || Alpha || Number of games to play || Agent name || Starting sum of agent
-	//	SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.2, 0.3, 0.2, games_to_train, "GreedySkynet", agent_money);
-		//train(greedy);
-		//exploit(greedy);
-		//playWithMoney(greedy, default_bet);
-		//greedy.saveQvaluesToCSV();
-		//ArrayList<Stock> stockvalues = greedy.importData();
-		//trainStockstuff(greedy, stockvalues);
-		//greedy.saveStockQvaluesToCSV();
+		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.2, 0.3, 0.2, games_to_train, "GreedySkynet", agent_money);
+		train(greedy);
+		exploit(greedy);
+		playWithMoney(greedy, default_bet);
+		greedy.saveQvaluesToCSV();
+
 
 		
 		// Batch testing of agents
@@ -118,7 +115,7 @@ public class App {
 
 		//Pair dpairs=(Pair) donkey.qvalues.keySet().toArray()[50];
 		//Pair gpairs=(Pair) greedy.qvalues.keySet().toArray()[50];
-		/*
+		
 		long end = System.currentTimeMillis();
 		if (!silent) {
 			System.out.println("*******************************");
@@ -131,31 +128,21 @@ public class App {
 			System.out.println("Skynet win " + df.format(100 / ((double) total_games / (double) player_wins))+ "%");
 			System.out.println("Execution time is " + df.format((end - start) / 1000d) + " seconds");
 			System.out.println("*******************************");
-		}*/
-	}
-	public static void doShit(ArrayList<Stock> stockvalues) {
-		long start = System.currentTimeMillis();
-		LOGGER.setLevel(Level.OFF);
-
-		SkynetAiAgent greedy = new SkynetAiAgent(decks, 0.2, 0.3, 0.2, games_to_train, "GreedySkynet", agent_money);
-
-		//ArrayList<Stock> stockvalues = greedy.importData();
-		trainStockstuff(greedy, stockvalues);
-		//greedy.saveStockQvaluesToCSV();
-
-		long end = System.currentTimeMillis();
-		if (!silent) {
-			OpenFile.addLine("*******************************");
-			OpenFile.addLine("Best agent, win " + df.format(best_win) + "% Name: " + best_agent.getName());
-			OpenFile.addLine("Best agent, balance: " + df.format(best_agent.getMoney()));
-			OpenFile.addLine("*******************************");
-			OpenFile.addLine("Skynet wins: " + player_wins);
-			OpenFile.addLine("Dealer wins: " + dealer_wins);
-			OpenFile.addLine("Total games: " + total_games);
-			OpenFile.addLine("Skynet win " + df.format(100 / ((double) total_games / (double) player_wins))+ "%");
-			OpenFile.addLine("Execution time is " + df.format((end - start) / 1000d) + " seconds");
-			OpenFile.addLine("*******************************");
 		}
+	}
+	public static void startGui(ArrayList<Stock> stockvalues) {
+		
+		double stock_epsilon = 0.2;
+		double stock_discount = 0.3;
+		double stock_alpha = 0.2;
+		double starting_money = 10000;
+				
+		SkynetStockAgent hal = new SkynetStockAgent(stock_epsilon, stock_discount, stock_alpha, "HAL 9000", starting_money);
+		
+		trainStockStuff(hal, stockvalues);
+		tryWithMoneyStockStuff(hal, stockvalues);
+
+
 	}
 
 	public static void train(SkynetAiAgent agent) {
@@ -344,7 +331,60 @@ public class App {
 
 	}
 	
-	public static void trainStockstuff(SkynetAiAgent agent, ArrayList<Stock> stockvalues) {
+	public static void trainStockStuff(SkynetStockAgent agent, ArrayList<Stock> stockvalues) {
+		
+			
+		// Momentum kaava
+		// Multiply that number by 100. M = (Price Today/Price Five Days Ago) x100.
+		
+		long start = System.currentTimeMillis();
+		double reward = 0;
+		double[] oldState;
+		double action;
+		int momentum=0;
+		int old_momemtum =0;
+		double price = 0;
+		
+		double old_price = 0;
+		Stock old_stock = null;
+		Stock current_stock = null;	
+		
+		// Train first for data we have.
+		for (int i = 0; i < stockvalues.size(); i++) {
+			//agent.setMoney(agent.getMoney() + 100);
+			if(old_price == 0) {
+				old_price = stockvalues.get(i).getShare_price();
+			}
+			current_stock = stockvalues.get(i);
+			price = stockvalues.get(i).getShare_price();
+			momentum = (int) ((price/old_price)*100);			
+			current_stock.setMomentum(momentum);			
+			oldState = agent.getStockState(current_stock, old_stock);
+			action = agent.getStockAction(oldState);
+						
+			double[] newState = agent.getStockState(current_stock, old_stock);
+			action = agent.getStockAction(oldState);
+			
+			if (old_momemtum < momentum){
+				reward = old_momemtum-momentum;
+				agent.updateStock(oldState, action, newState, reward);
+			} else {				
+				reward = momentum-old_momemtum;				
+				agent.updateStock(oldState, action, newState, reward);
+			}
+			
+		}
+		
+		long end = System.currentTimeMillis();
+		OpenFile.addLine("Training took " + df.format((end - start) / 1000d) + " seconds");
+		
+		
+	}
+	
+public static void tryWithMoneyStockStuff(SkynetStockAgent agent, ArrayList<Stock> stockvalues) {
+		
+		int buy = 0;
+		int sell = 0;
 		
 		// Momentum kaava
 		// Multiply that number by 100. M = (Price Today/Price Five Days Ago) x100.
@@ -356,6 +396,8 @@ public class App {
 		boolean isWin;
 		int momentum=0;
 		int old_momemtum =0;
+		double price = 0;
+		double pe_val = 0;
 		
 		double old_price = 0;
 		double old_pe_val = 0;
@@ -363,6 +405,7 @@ public class App {
 		Stock current_stock = null;
 		double starting_money = agent.getMoney();
 		OpenFile.addLine("Agent starting money: " + df.format(starting_money) + "€");
+		
 		for (int i = 0; i < stockvalues.size(); i++) {
 			String ai_action = "None";
 			//agent.setMoney(agent.getMoney() + 100);
@@ -370,13 +413,13 @@ public class App {
 				old_price = stockvalues.get(i).getShare_price();
 			}
 			current_stock = stockvalues.get(i);
-			double price = stockvalues.get(i).getShare_price();
+			price = stockvalues.get(i).getShare_price();
 			momentum = (int) ((price/old_price)*100);			
 			current_stock.setMomentum(momentum);			
 			oldState = agent.getStockState(current_stock, old_stock);
 			action = agent.getStockAction(oldState);
 						
-			double pe_val = stockvalues.get(i).getPe_value();
+			pe_val = stockvalues.get(i).getPe_value();
 			double[] newState = agent.getStockState(current_stock, old_stock);
 			action = agent.getStockAction(oldState);
 			
@@ -405,7 +448,7 @@ public class App {
 					ai_action ="Sell";
 				}
 				
-				double money_from_selling = sellStocks(how_many_to_sell, stockvalues.get(i).getShare_price());
+				double money_from_selling = agent.sellStocks(how_many_to_sell, stockvalues.get(i).getShare_price());
 				agent.setMoney(agent.getMoney()+money_from_selling);
 				agent.setStockCount(agent.getStockCount() - how_many_to_sell);
 				
@@ -425,7 +468,7 @@ public class App {
 					ai_action = "Buy";
 				}
 				
-				int ammount_to_buy = buyStocks(usable_money,stockvalues.get(i).getShare_price());
+				int ammount_to_buy = agent.buyStocks(usable_money,stockvalues.get(i).getShare_price());
 				agent.setStockCount(agent.getStockCount() + ammount_to_buy);
 				double purchase_value = ammount_to_buy * stockvalues.get(i).getShare_price();		
 				agent.setMoney(agent.getMoney()-purchase_value);
@@ -433,7 +476,7 @@ public class App {
 			}
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
 			double current_networth = agent.getMoney() + (stockvalues.get(i).getShare_price()) * agent.getStockCount();
-			OpenFile.addQLine(old_price,old_pe_val,price,pe_val, agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount(), df.format(current_networth));
+			OpenFile.addQLine(Arrays.toString(newState), old_price,old_pe_val,price,pe_val, agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount(), df.format(current_networth));
 			old_pe_val = stockvalues.get(i).getPe_value();
 			old_price = stockvalues.get(i).getShare_price();
 			old_stock = stockvalues.get(i);
@@ -454,14 +497,7 @@ public class App {
 		OpenFile.addLine("Fiddling data took " + df.format((end - start) / 1000d) + " seconds");
 	}
 	
-	public static int buyStocks(double money, double stock_prize) {		
-		
-		return (int) (money / stock_prize);
-	}
-	
-	public static double sellStocks (int count, double stock_prize) {
-		return count * stock_prize;
-	}
+
 	
 
 

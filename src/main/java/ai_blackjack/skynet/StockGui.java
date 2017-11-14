@@ -9,7 +9,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -56,11 +55,8 @@ public class StockGui {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel p = new JPanel();
 
-		//JSplitPane splitPane = new JSplitPane();
 		frame.getContentPane().add(p, BorderLayout.NORTH);
 
-		
-		
 		DefaultTableModel model = new DefaultTableModel();
 		table = new JTable(model);
 
@@ -75,7 +71,7 @@ public class StockGui {
 
 		DefaultTableModel model3 = new DefaultTableModel();
 		ThirdTable = new JTable(model3);
-
+		model3.addColumn("State");
 		model3.addColumn("Old price");
 		model3.addColumn("Old pe-value");
 		model3.addColumn("Price");
@@ -86,6 +82,7 @@ public class StockGui {
 		model3.addColumn("Money");
 		model3.addColumn("Stock Count");
 		model3.addColumn("Networth");
+		
 
 		JButton btnSelectFile = new JButton("Open file");
 
@@ -96,7 +93,7 @@ public class StockGui {
 		scroll_table.setBounds(5, 10, 300, 150);
 		scroll_table.setVisible(true);
 
-		tabbedPane.add("Data", scroll_table);
+		tabbedPane.add("Imported data", scroll_table);
 		frame.setBounds(100, 100, 450, 462);
 
 		JScrollPane scroll_salary_table = new JScrollPane(SecondTable);
@@ -108,9 +105,7 @@ public class StockGui {
 		scroll_table.setBounds(5, 10, 300, 150);
 		scroll_table.setVisible(true);
 		tabbedPane.add("Q-values & Misc data", QvalueTAble);
-		
 
-		
 		p.add(btnSelectFile);
 		btnSelectFile.addActionListener(new ActionListener() {
 
@@ -120,20 +115,20 @@ public class StockGui {
 
 				try {
 					openfile.FilePicker(model, model2, model3);
-					
-					 JFreeChart lineChart = ChartFactory.createLineChart(
-					         "Networth",
-					         "Date","Networth",
-					         OpenFile.createDataset(),
-					         PlotOrientation.VERTICAL,
-					         true,true,false);
-					 
-					 lineChart.getCategoryPlot().getRangeAxis().setLowerBound(8000);
-					 
-					      ChartPanel chartPanel = new ChartPanel( lineChart );
-							tabbedPane.add("Charts & shits", chartPanel);
-					chartPanel.setMouseZoomable(true);;
-					
+
+					JFreeChart lineChart = ChartFactory.createLineChart(
+							"Networth", "Date", "Networth",
+							OpenFile.createDataset(), PlotOrientation.VERTICAL,
+							true, true, false);
+
+					lineChart.getCategoryPlot().getRangeAxis()
+							.setLowerBound(8000);
+
+					ChartPanel chartPanel = new ChartPanel(lineChart);
+					tabbedPane.add("AI Networth chart", chartPanel);
+					chartPanel.setMouseZoomable(true);
+					;
+
 					frame.setBounds(100, 100, 450, 462);
 
 				} catch (Exception e1) {
@@ -142,20 +137,19 @@ public class StockGui {
 
 			}
 		});
-/*
-		//JButton btnDoStuffAnd = new JButton("Do stuff and save");
-		btnDoStuffAnd.setEnabled(false);
-		splitPane.setRightComponent(btnDoStuffAnd);
-		
-
-		btnDoStuffAnd.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("lööl");
-
-			}
-		});*/
+		/*
+		 * //JButton btnDoStuffAnd = new JButton("Do stuff and save");
+		 * btnDoStuffAnd.setEnabled(false);
+		 * splitPane.setRightComponent(btnDoStuffAnd);
+		 * 
+		 * 
+		 * btnDoStuffAnd.addActionListener(new ActionListener() {
+		 * 
+		 * @Override public void actionPerformed(ActionEvent e) {
+		 * System.out.println("lööl");
+		 * 
+		 * } });
+		 */
 	}
 
 }

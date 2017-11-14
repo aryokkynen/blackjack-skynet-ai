@@ -47,7 +47,7 @@ public class OpenFile {
 
 			}
 
-			App.doShit(stockList);
+			App.startGui(stockList);
 		}
 
 	}
@@ -57,9 +57,9 @@ public class OpenFile {
 
 	}
 
-	public static void addQLine(double old_price, double old_pe_val, double price, double pe_val,
+	public static void addQLine(String state, double old_price, double old_pe_val, double price, double pe_val,
 			String name, int momemtum, String ai_action, String money, int stock_count, String networth) {
-		Qtaulu.addRow(new Object[] { old_price, old_pe_val, price, pe_val, name, momemtum, ai_action, money,
+		Qtaulu.addRow(new Object[] {state, old_price, old_pe_val, price, pe_val, name, momemtum, ai_action, money,
 				stock_count, networth });
 
 	}
@@ -68,7 +68,7 @@ public class OpenFile {
 	      double networth = 0;
 	      String input ="";
 	      for (int i = 0; i < Qtaulu.getRowCount(); i++) {	  
-	    	  input = Qtaulu.getValueAt(i,9).toString();
+	    	  input = Qtaulu.getValueAt(i,10).toString();
 	    	  String[]inputArray = input.split(",");	  
 	    	  networth = Double.parseDouble(inputArray[0]);
 	    	 dataset.addValue(networth, "Networth", Integer.toString(i));

@@ -482,7 +482,7 @@ public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> st
 			}
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
 			double current_networth = agent.getMoney() + (stockvalues.get(i).getShare_price()) * agent.getStockCount();
-			OpenFile.addQLine(Arrays.toString(newState), old_price,old_pe_val,price,pe_val, agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount(), df.format(current_networth));
+			OpenFile.addQLine(Arrays.toString(newState), reward, old_price,old_pe_val,price,pe_val, agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount(), df.format(current_networth));
 			old_pe_val = stockvalues.get(i).getPe_value();
 			old_price = stockvalues.get(i).getShare_price();
 			old_stock = stockvalues.get(i);

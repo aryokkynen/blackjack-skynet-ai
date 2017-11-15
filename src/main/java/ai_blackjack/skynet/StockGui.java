@@ -72,6 +72,7 @@ public class StockGui {
 		DefaultTableModel model3 = new DefaultTableModel();
 		ThirdTable = new JTable(model3);
 		model3.addColumn("State");
+		model3.addColumn("Q-value");
 		model3.addColumn("Old price");
 		model3.addColumn("Old pe-value");
 		model3.addColumn("Price");
@@ -122,7 +123,7 @@ public class StockGui {
 							true, true, false);
 
 					lineChart.getCategoryPlot().getRangeAxis()
-							.setLowerBound(8000);
+							.setLowerBound(7000);
 
 					ChartPanel chartPanel = new ChartPanel(lineChart);
 					tabbedPane.add("AI Networth chart", chartPanel);

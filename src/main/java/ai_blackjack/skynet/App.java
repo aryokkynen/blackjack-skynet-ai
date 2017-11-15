@@ -140,10 +140,10 @@ public class App {
 				
 		SkynetStockAgent hal = new SkynetStockAgent(stock_epsilon, stock_discount, stock_alpha, "HAL 9000", starting_money);
 		
-		//trainStockStuff(hal, stockvalues.subList( 0, (stockvalues.size()/2)));
-		//tryWithMoneyStockStuff(hal, stockvalues.subList(stockvalues.size()/2, stockvalues.size()));
-		trainStockStuff(hal, stockvalues.subList(stockvalues.size()/2, stockvalues.size()));
-		tryWithMoneyStockStuff(hal, stockvalues.subList( 0, (stockvalues.size()/2)));
+		trainStockStuff(hal, stockvalues.subList( 0, (stockvalues.size()/2)));
+		tryWithMoneyStockStuff(hal, stockvalues.subList(stockvalues.size()/2, stockvalues.size()));
+		//trainStockStuff(hal, stockvalues.subList(stockvalues.size()/2, stockvalues.size()));
+		//tryWithMoneyStockStuff(hal, stockvalues.subList( 0, (stockvalues.size()/2)));
 
 	}
 

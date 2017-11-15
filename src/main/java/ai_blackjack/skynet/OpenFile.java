@@ -66,6 +66,7 @@ public class OpenFile {
 	}
 	  public static DefaultCategoryDataset createDataset( ) {
 	      DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
+	      
 	      double networth = 0;
 	      double stockvalue = 0;
 	      String input ="";

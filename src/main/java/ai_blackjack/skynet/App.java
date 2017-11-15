@@ -133,9 +133,9 @@ public class App {
 	}
 	public static void startGui(ArrayList<Stock> stockvalues) {
 		
-		double stock_epsilon = 0.2;
-		double stock_discount = 0.3;
-		double stock_alpha = 0.2;
+		double stock_epsilon = 0.9;
+		double stock_discount = 0.2;
+		double stock_alpha = 0.9;
 		double starting_money = 10000;
 				
 		SkynetStockAgent hal = new SkynetStockAgent(stock_epsilon, stock_discount, stock_alpha, "HAL 9000", starting_money);
@@ -388,6 +388,13 @@ public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> st
 		int buy = 0;
 		int sell = 0;
 		
+		
+		agent.setAlpha(0.2);
+		agent.setEpsilon(0.2);
+		agent.setDiscount(0.02);
+		
+		OpenFile.Qtaulu.setRowCount(0);
+		
 		// Momentum kaava
 		// Multiply that number by 100. M = (Price Today/Price Five Days Ago) x100.
 		
@@ -501,6 +508,7 @@ public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> st
 		OpenFile.addLine("No action: " + (stockvalues.size() - buy - sell));
 		long end = System.currentTimeMillis();
 		OpenFile.addLine("Fiddling data took " + df.format((end - start) / 1000d) + " seconds");
+		OpenFile.addLine("");
 	}
 	
 

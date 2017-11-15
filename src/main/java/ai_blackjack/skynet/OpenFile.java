@@ -57,21 +57,29 @@ public class OpenFile {
 
 	}
 
-	public static void addQLine(String state, double old_price, double old_pe_val, double price, double pe_val,
+	public static void addQLine(String state,double reward, double old_price, double old_pe_val, double price, double pe_val,
 			String name, int momemtum, String ai_action, String money, int stock_count, String networth) {
-		Qtaulu.addRow(new Object[] {state, old_price, old_pe_val, price, pe_val, name, momemtum, ai_action, money,
+		Qtaulu.addRow(new Object[] {state, reward, old_price, old_pe_val, price, pe_val, name, momemtum, ai_action, money,
 				stock_count, networth });
 
 	}
 	  public static DefaultCategoryDataset createDataset( ) {
 	      DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
 	      double networth = 0;
+	      double stockvalue = 0;
 	      String input ="";
+	      String input2 ="";
+	      double balancer = 0;
+	      balancer = 10000/Double.parseDouble(Qtaulu.getValueAt(0, 4).toString());
 	      for (int i = 0; i < Qtaulu.getRowCount(); i++) {	  
-	    	  input = Qtaulu.getValueAt(i,10).toString();
+	    	  input = Qtaulu.getValueAt(i,11).toString();
 	    	  String[]inputArray = input.split(",");	  
+	    	  input2 = Qtaulu.getValueAt(i,4).toString();
+	    	  String[]inputArray2 = input2.split(",");	  
 	    	  networth = Double.parseDouble(inputArray[0]);
+	    	  stockvalue = Double.parseDouble(inputArray2[0])*balancer;
 	    	 dataset.addValue(networth, "Networth", Integer.toString(i));
+	    	 dataset.addValue(stockvalue, "Stockvalue", Integer.toString(i));
 		}
 	     
 	      return dataset;

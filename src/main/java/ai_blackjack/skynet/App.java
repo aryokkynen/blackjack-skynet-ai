@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -139,9 +140,10 @@ public class App {
 				
 		SkynetStockAgent hal = new SkynetStockAgent(stock_epsilon, stock_discount, stock_alpha, "HAL 9000", starting_money);
 		
-		trainStockStuff(hal, stockvalues);
-		tryWithMoneyStockStuff(hal, stockvalues);
-
+		//trainStockStuff(hal, stockvalues.subList( 0, (stockvalues.size()/2)));
+		//tryWithMoneyStockStuff(hal, stockvalues.subList(stockvalues.size()/2, stockvalues.size()));
+		trainStockStuff(hal, stockvalues.subList(stockvalues.size()/2, stockvalues.size()));
+		tryWithMoneyStockStuff(hal, stockvalues.subList( 0, (stockvalues.size()/2)));
 
 	}
 
@@ -331,7 +333,7 @@ public class App {
 
 	}
 	
-	public static void trainStockStuff(SkynetStockAgent agent, ArrayList<Stock> stockvalues) {
+	public static void trainStockStuff(SkynetStockAgent agent, List<Stock> stockvalues) {
 		
 			
 		// Momentum kaava
@@ -381,7 +383,7 @@ public class App {
 		
 	}
 	
-public static void tryWithMoneyStockStuff(SkynetStockAgent agent, ArrayList<Stock> stockvalues) {
+public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> stockvalues) {
 		
 		int buy = 0;
 		int sell = 0;
@@ -473,6 +475,10 @@ public static void tryWithMoneyStockStuff(SkynetStockAgent agent, ArrayList<Stoc
 				double purchase_value = ammount_to_buy * stockvalues.get(i).getShare_price();		
 				agent.setMoney(agent.getMoney()-purchase_value);
 				
+			}
+			
+			if (action == 3) {
+				System.out.println("sflkdajfsajd");
 			}
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
 			double current_networth = agent.getMoney() + (stockvalues.get(i).getShare_price()) * agent.getStockCount();

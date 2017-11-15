@@ -48,6 +48,7 @@ public class OpenFile {
 			}
 
 			App.startGui(stockList);
+			
 		}
 
 	}

@@ -127,10 +127,9 @@ public class StockGui {
 					ChartPanel chartPanel = new ChartPanel(lineChart);
 					tabbedPane.add("AI Networth chart", chartPanel);
 					chartPanel.setMouseZoomable(true);
-					;
 
 					frame.setBounds(100, 100, 450, 462);
-
+					
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}

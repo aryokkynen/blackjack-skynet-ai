@@ -51,7 +51,7 @@ public class StockGui {
 	 */
 	private void initialize() {
 		frame = new JFrame("Skynet stock thing");
-		frame.setBounds(100, 100, 450, 461);
+		frame.setBounds(100, 100, 800, 800);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel p = new JPanel();
 
@@ -91,19 +91,19 @@ public class StockGui {
 		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
 		JScrollPane scroll_table = new JScrollPane(table);
-		scroll_table.setBounds(5, 10, 300, 150);
+		scroll_table.setBounds(5, 10, 800, 800);
 		scroll_table.setVisible(true);
 
 		tabbedPane.add("Imported data", scroll_table);
-		frame.setBounds(100, 100, 450, 462);
+		frame.setBounds(100, 100, 800, 800);
 
-		JScrollPane scroll_salary_table = new JScrollPane(SecondTable);
-		scroll_table.setBounds(5, 10, 300, 150);
+		JScrollPane ai_data = new JScrollPane(SecondTable);
+		scroll_table.setBounds(5, 10, 800, 800);
 		scroll_table.setVisible(true);
-		tabbedPane.add("AI data", scroll_salary_table);
+		tabbedPane.add("AI data", ai_data);
 
 		JScrollPane QvalueTAble = new JScrollPane(ThirdTable);
-		scroll_table.setBounds(5, 10, 300, 150);
+		scroll_table.setBounds(5, 10, 800, 800);
 		scroll_table.setVisible(true);
 		tabbedPane.add("Q-values & Misc data", QvalueTAble);
 
@@ -129,7 +129,7 @@ public class StockGui {
 					tabbedPane.add("AI Networth chart", chartPanel);
 					chartPanel.setMouseZoomable(true);
 
-					frame.setBounds(100, 100, 450, 462);
+					frame.setBounds(100, 100, 800, 800);
 					
 				} catch (Exception e1) {
 					e1.printStackTrace();

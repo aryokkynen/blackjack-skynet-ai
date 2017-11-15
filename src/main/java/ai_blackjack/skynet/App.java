@@ -371,7 +371,7 @@ public class App {
 				reward = old_momemtum-momentum;
 				agent.updateStock(oldState, action, newState, reward);
 			} else {				
-				reward = momentum-old_momemtum;				
+				reward = old_momemtum-momentum;				
 				agent.updateStock(oldState, action, newState, reward);
 			}
 			

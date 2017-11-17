@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.math3.util.Precision;
 
 public class SkynetStockAgent {
 	Stock stock;
@@ -28,9 +29,9 @@ public class SkynetStockAgent {
 	List<Object> info;
 	int stock_count;
 	static DecimalFormat df = new DecimalFormat("####0.00");
-	String[] STOCK_HEADERS = { "STATE", "QVALUE", "AI SUGGESTED ACTION",
-			"OLD STOCK PRICE", "OLD P/E", "CURRENT STOCK PRIZE", "CURRENT P/E",
-			"BUY/SELL", "SKYNET HANDLE" };
+	String[] STOCK_HEADERS = { "STATE", "QVALUE", "AI SUGGESTED ACTION", "OLD STOCK PRICE", "OLD P/E",
+			"CURRENT STOCK PRIZE", "CURRENT P/E", "BUY/SELL", "SKYNET HANDLE" };
+	double qval = 0;
 
 	public SkynetStockAgent(double e, double d, double a, String name, double m) {
 		this.name = name;
@@ -41,6 +42,7 @@ public class SkynetStockAgent {
 		this.info = new ArrayList<>();
 		this.money = m;
 		this.stock_count = 0;
+		this.qval = 0;
 	}
 
 	public double[] getStockState(Stock current, Stock old) {
@@ -48,10 +50,14 @@ public class SkynetStockAgent {
 		double[] state = new double[4];
 
 		try {
-			state[0] = current.getShare_price();
-			state[1] = current.getMomentum();
-			state[2] = old.getShare_price();
-			state[3] = old.getMomentum();
+			double cp = current.getShare_price();
+			double cm = current.getMomentum();
+			double op = old.getShare_price();
+			double om = old.getMomentum();
+			state[0] = Precision.round(cp, 1);
+			state[1] = cm;
+			state[2] = Precision.round(op, 1);
+			state[3] = om;
 		} catch (Exception e) {
 			state[2] = 8.37;
 			state[3] = 100;
@@ -76,17 +82,15 @@ public class SkynetStockAgent {
 	public void saveStockQvaluesToCSV() throws IOException {
 
 		FileWriter out = new FileWriter("StockQvalues_" + getName() + ".csv");
-		try (CSVPrinter printer = new CSVPrinter(out,
-				CSVFormat.DEFAULT.withHeader(STOCK_HEADERS))) {
+		try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(STOCK_HEADERS))) {
 			qvalues.forEach((pair, reward) -> {
 
 				try {
 					if (count < info.size()) { // Print end of game info
-						printer.printRecord(Arrays.toString(pair.stateDouble),
-								reward, pair.action_double, info.get(count));
+						printer.printRecord(Arrays.toString(pair.stateDouble), reward, pair.action_double,
+								info.get(count));
 					} else { // Print only state updates
-						printer.printRecord(Arrays.toString(pair.stateDouble),
-								reward, pair.action_double);
+						printer.printRecord(Arrays.toString(pair.stateDouble), reward, pair.action_double);
 					}
 					count++;
 				} catch (Exception e) {
@@ -103,7 +107,7 @@ public class SkynetStockAgent {
 
 		double maxValue = -99999.0;
 		double maxAction = 0;
-		double actionValue;
+		double actionValue = 0;
 		double[] legalActions = this.getLegalStockActions(state);
 		for (int i = 0; i < 3; i++) {
 			actionValue = this.getStockQValue(state, legalActions[i]);
@@ -112,6 +116,7 @@ public class SkynetStockAgent {
 				maxAction = legalActions[i];
 			}
 		}
+		
 		return maxAction;
 	}
 
@@ -129,6 +134,8 @@ public class SkynetStockAgent {
 				maxAction = legalActions[i];
 			}
 		}
+		
+
 		return maxValue;
 	}
 
@@ -149,13 +156,11 @@ public class SkynetStockAgent {
 		return a;
 	}
 
-	public void updateStock(double[] state, double action, double[] nextState,
-			double reward) {
-		double qvalue = this.getStockQValue(state, action)
-				+ this.alpha
-				* (reward + this.discount * this.getStockValue(nextState) - this
-						.getStockQValue(state, action));
+	public void updateStock(double[] state, double action, double[] nextState, double reward) {
+		double qvalue = this.getStockQValue(state, action) + this.alpha
+				* (reward + this.discount * this.getStockValue(nextState) - this.getStockQValue(state, action));
 		Pair pair = new Pair(state, action);
+		setQval(qvalue);
 		this.qvalues.put(pair, qvalue);
 	}
 
@@ -248,5 +253,13 @@ public class SkynetStockAgent {
 
 	public double sellStocks(int count, double stock_prize) {
 		return count * stock_prize;
+	}
+
+	public double getQval() {
+		return this.qval;
+	}
+
+	public void setQval(double q) {
+		this.qval = q;
 	}
 }

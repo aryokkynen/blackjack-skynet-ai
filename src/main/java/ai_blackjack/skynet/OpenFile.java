@@ -58,9 +58,9 @@ public class OpenFile {
 
 	}
 
-	public static void addQLine(String state,double reward, double old_price, double old_pe_val, double price, double pe_val,
+	public static void addQLine(String state, String qvalue, double old_price, double old_pe_val, double price, double pe_val,
 			String name, int momemtum, String ai_action, String money, int stock_count, String networth) {
-		Qtaulu.addRow(new Object[] {state, reward, old_price, old_pe_val, price, pe_val, name, momemtum, ai_action, money,
+		Qtaulu.addRow(new Object[] {state, qvalue, old_price, old_pe_val, price, pe_val, name, momemtum, ai_action, money,
 				stock_count, networth });
 
 	}

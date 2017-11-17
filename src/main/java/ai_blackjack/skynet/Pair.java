@@ -1,5 +1,6 @@
 package ai_blackjack.skynet;
 
+import java.util.Arrays;
 
 public class Pair {
 	public int[] state;
@@ -28,5 +29,12 @@ public class Pair {
 		return this.action_double;
 	}
 
+	@Override
+	public String toString() {
+		return "Pair [state=" + Arrays.toString(state) + ", action=" + action + ", stateDouble="
+				+ Arrays.toString(stateDouble) + ", action_double=" + action_double + "]";
+	}
+
+	
 
 }

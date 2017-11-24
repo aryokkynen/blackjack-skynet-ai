@@ -22,7 +22,8 @@ public class StockGui {
 
 	private JFrame frame;
 	private JTable table, SecondTable, ThirdTable;
-	
+
+	private boolean training;
 	int x = 100;
 	int y = 100;
 	int width = 1200;
@@ -65,9 +66,9 @@ public class StockGui {
 		DefaultTableModel model = new DefaultTableModel();
 		table = new JTable(model);
 
-		model.addColumn("date");
-		model.addColumn("price");
-		model.addColumn("pe_value");
+		model.addColumn("Date");
+		model.addColumn("Price");
+		model.addColumn("Adjusted price");
 
 		DefaultTableModel model2 = new DefaultTableModel();
 		SecondTable = new JTable(model2);
@@ -79,18 +80,17 @@ public class StockGui {
 		model3.addColumn("State");
 		model3.addColumn("Q-value");
 		model3.addColumn("Old price");
-		model3.addColumn("Old pe-value");
-		model3.addColumn("Price");
-		model3.addColumn("Pe-value");
+		model3.addColumn("Adjusted price");
 		model3.addColumn("Agent name");
 		model3.addColumn("Momemtum");
 		model3.addColumn("Ai Action");
 		model3.addColumn("Money");
 		model3.addColumn("Stock Count");
 		model3.addColumn("Networth");
-		
+		model3.addColumn("Common price");
 
 		JButton btnSelectFile = new JButton("Open file");
+		JButton btnSelectTrainingFile = new JButton("Open Training file");
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
@@ -99,13 +99,13 @@ public class StockGui {
 		scroll_table.setBounds(x, y, width, height);
 		scroll_table.setVisible(true);
 
-		tabbedPane.add("Imported data", scroll_table);
-		frame.setBounds(x, y, width, height);
-
 		JScrollPane ai_data = new JScrollPane(SecondTable);
 		scroll_table.setBounds(x, y, width, height);
 		scroll_table.setVisible(true);
 		tabbedPane.add("AI data", ai_data);
+
+		tabbedPane.add("Imported data", scroll_table);
+		frame.setBounds(x, y, width, height);
 
 		JScrollPane QvalueTAble = new JScrollPane(ThirdTable);
 		scroll_table.setBounds(x, y, width, height);
@@ -118,33 +118,46 @@ public class StockGui {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				OpenFile openfile = new OpenFile();
+				training = false;
 
 				try {
-					openfile.FilePicker(model, model2, model3);
+					openfile.FilePicker(model, model2, model3, training);
 
-					JFreeChart lineChart = ChartFactory.createLineChart(
-							"Networth", "Date", "Networth",
-							OpenFile.createDataset(), PlotOrientation.VERTICAL,
-							true, true, false);
+					JFreeChart lineChart = ChartFactory.createLineChart("Networth", "Date", "Networth",
+							OpenFile.createDataset(), PlotOrientation.VERTICAL, true, true, false);
 
-					lineChart.getCategoryPlot().getRangeAxis()
-							.setLowerBound(7000);
+					lineChart.getCategoryPlot().getRangeAxis().setLowerBound(7000);
 
 					ChartPanel chartPanel = new ChartPanel(lineChart);
 					tabbedPane.add("AI Networth chart", chartPanel);
 					chartPanel.setMouseZoomable(true);
 
-					
-					
-					
 					frame.setBounds(x, y, width, height);
-					
+
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 
 			}
 		});
+
+		p.add(btnSelectTrainingFile);
+		btnSelectTrainingFile.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				OpenFile openfile = new OpenFile();
+				training = true;
+				try {
+					openfile.Trainer(model2, training);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+			}
+		});
+
 		/*
 		 * //JButton btnDoStuffAnd = new JButton("Do stuff and save");
 		 * btnDoStuffAnd.setEnabled(false);

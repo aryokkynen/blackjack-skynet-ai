@@ -17,9 +17,9 @@ public class OpenFile {
 
 	List<String> tyot;
 
-	public void FilePicker(DefaultTableModel model, DefaultTableModel model2, DefaultTableModel model3)
-			throws Exception {
-		filechooser.setCurrentDirectory(new java.io.File("."));
+	public void FilePicker(DefaultTableModel model, DefaultTableModel model2, DefaultTableModel model3,
+			boolean training) throws Exception {
+		filechooser.setCurrentDirectory(new java.io.File("./data"));
 		if (filechooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			Taulu = model2;
 			Qtaulu = model3;
@@ -33,22 +33,57 @@ public class OpenFile {
 			}
 			input.close();
 
-			for (int i = 0; i < Data.size(); i++) {
+			for (int i = 1; i < Data.size(); i++) {
 
 				String temp = Data.get(i).toString();
 
-				String[] asdf = temp.split(";");
+				String[] asdf = temp.split(",");
 				String date = asdf[0];
 				double price = Double.parseDouble(asdf[1]);
-				double pe_value = Double.parseDouble(asdf[2]);
-				Stock s = new Stock(date, price, pe_value, 0);
-				model.addRow(new Object[] { date, price, pe_value });
+				double adjusted_price = Double.parseDouble(asdf[2]);
+				Stock s = new Stock(date, price, adjusted_price, 0, 0,0);
+				model.addRow(new Object[] { date, price, adjusted_price });
 				stockList.add(s);
 
 			}
 
-			App.startGui(stockList);
-			
+			App.startGui(stockList, training);
+
+		}
+
+	}
+
+	public void Trainer(DefaultTableModel model2, boolean training) throws Exception {
+		filechooser.setCurrentDirectory(new java.io.File("./data"));
+		if (filechooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			File file = filechooser.getSelectedFile();
+			Taulu = model2;
+			ArrayList<Stock> stockList = new ArrayList<Stock>();
+
+			Scanner input = new Scanner(file);
+
+			while (input.hasNext()) {
+				Data.add(input.nextLine());
+			}
+			input.close();
+
+			for (int i = 1; i < Data.size(); i++) {
+
+				String temp = Data.get(i).toString();
+
+				String[] asdf = temp.split(",");
+				String date = asdf[0];
+				double price = Double.parseDouble(asdf[1]);
+				double adjusted_price = Double.parseDouble(asdf[2]);
+		
+				Stock s = new Stock(date, price, adjusted_price, 0, 0, 0);
+
+				stockList.add(s);
+
+			}
+
+			App.startGui(stockList, training);
+
 		}
 
 	}
@@ -58,33 +93,34 @@ public class OpenFile {
 
 	}
 
-	public static void addQLine(String state, String qvalue, double old_price, double old_pe_val, double price, double pe_val,
-			String name, int momemtum, String ai_action, String money, int stock_count, String networth) {
-		Qtaulu.addRow(new Object[] {state, qvalue, old_price, old_pe_val, price, pe_val, name, momemtum, ai_action, money,
-				stock_count, networth });
+	public static void addQLine(String state, String qvalue, double old_price, double price, String name, int momemtum,
+			String ai_action, String money, int stock_count, String networth, String common_price) {
+		Qtaulu.addRow(new Object[] { state, qvalue, old_price, price, name, momemtum, ai_action, money, stock_count,
+				networth, common_price });
 
 	}
-	  public static DefaultCategoryDataset createDataset( ) {
-	      DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
-	      
-	      double networth = 0;
-	      double stockvalue = 0;
-	      String input ="";
-	      String input2 ="";
-	      double balancer = 0;
-	      balancer = 10000/Double.parseDouble(Qtaulu.getValueAt(0, 4).toString());
-	      for (int i = 0; i < Qtaulu.getRowCount(); i++) {	  
-	    	  input = Qtaulu.getValueAt(i,11).toString();
-	    	  String[]inputArray = input.split(",");	  
-	    	  input2 = Qtaulu.getValueAt(i,4).toString();
-	    	  String[]inputArray2 = input2.split(",");	  
-	    	  networth = Double.parseDouble(inputArray[0]);
-	    	  stockvalue = Double.parseDouble(inputArray2[0])*balancer;
-	    	 dataset.addValue(networth, "Networth", Integer.toString(i));
-	    	 dataset.addValue(stockvalue, "Stockvalue", Integer.toString(i));
+
+	public static DefaultCategoryDataset createDataset() {
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+		double networth = 0;
+		double stockvalue = 0;
+		String input = "";
+		String input2 = "";
+		double balancer = 0;
+		balancer = 10000 / Double.parseDouble(Qtaulu.getValueAt(0, 3).toString());
+		for (int i = 0; i < Qtaulu.getRowCount(); i++) {
+			input = Qtaulu.getValueAt(i, 9).toString();
+			String[] inputArray = input.split(",");
+			input2 = Qtaulu.getValueAt(i, 3).toString();
+			String[] inputArray2 = input2.split(",");
+			networth = Double.parseDouble(inputArray[0]);
+			stockvalue = Double.parseDouble(inputArray2[0]) * balancer;
+			dataset.addValue(networth, "Networth", Integer.toString(i));
+			dataset.addValue(stockvalue, "Stockvalue", Integer.toString(i));
 		}
-	     
-	      return dataset;
-	   }
-	
+
+		return dataset;
+	}
+
 }

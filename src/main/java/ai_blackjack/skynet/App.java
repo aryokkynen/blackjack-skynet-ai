@@ -27,6 +27,7 @@ public class App {
 	static boolean silent = true;
 	static double best_win = 0;
 	static SkynetAiAgent best_agent;
+	static SkynetStockAgent hal = new SkynetStockAgent(0, 0, 0, "HAL 9000", agent_money);
 	
 	
 
@@ -131,19 +132,20 @@ public class App {
 			System.out.println("*******************************");
 		}
 	}
-	public static void startGui(ArrayList<Stock> stockvalues) {
+	public static void startGui(ArrayList<Stock> stockvalues, boolean training) {
 		
-		double stock_epsilon = 0.9;
-		double stock_discount = 0.2;
-		double stock_alpha = 0.9;
-		double starting_money = 10000;
-				
-		SkynetStockAgent hal = new SkynetStockAgent(stock_epsilon, stock_discount, stock_alpha, "HAL 9000", starting_money);
-		
-		trainStockStuff(hal, stockvalues.subList( 0, (stockvalues.size()/2)));
-		tryWithMoneyStockStuff(hal, stockvalues.subList(stockvalues.size()/2, stockvalues.size()));
-		//trainStockStuff(hal, stockvalues.subList(stockvalues.size()/2, stockvalues.size()));
-		//tryWithMoneyStockStuff(hal, stockvalues.subList( 0, (stockvalues.size()/2)));
+		if(training){
+			hal.setAlpha(Math.random());
+			hal.setDiscount(Math.random());
+			hal.setEpsilon(Math.random());			
+			trainStockStuff(hal, stockvalues);
+		}
+		if (!training){
+			hal.setAlpha(Math.random());
+			hal.setDiscount(Math.random());
+			hal.setEpsilon(Math.random());
+			tryWithMoneyStockStuff(hal, stockvalues);
+		}
 
 	}
 
@@ -353,12 +355,18 @@ public class App {
 		
 		// Train first for data we have.
 		for (int i = 0; i < stockvalues.size(); i++) {
+			
+			//Randomize training
+			agent.setAlpha(Math.random());
+			agent.setDiscount(Math.random());
+			agent.setEpsilon(Math.random());	
+			
 			//agent.setMoney(agent.getMoney() + 100);
 			if(old_price == 0) {
-				old_price = stockvalues.get(i).getShare_price();
+				old_price = stockvalues.get(i).getAdjusted_price();
 			}
 			current_stock = stockvalues.get(i);
-			price = stockvalues.get(i).getShare_price();
+			price = stockvalues.get(i).getAdjusted_price();
 			momentum = (int) ((price/old_price)*100);			
 			current_stock.setMomentum(momentum);			
 			oldState = agent.getStockState(current_stock, old_stock);
@@ -368,10 +376,10 @@ public class App {
 			action = agent.getStockAction(oldState);
 			
 			if (old_momemtum < momentum){
-				reward = old_momemtum-momentum;
+				reward = old_momemtum-momentum-5;
 				agent.updateStock(oldState, action, newState, reward);
 			} else {				
-				reward = old_momemtum-momentum;				
+				reward = old_momemtum-momentum+5;				
 				agent.updateStock(oldState, action, newState, reward);
 			}
 			
@@ -384,14 +392,15 @@ public class App {
 	}
 	
 public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> stockvalues) {
-		
+		// Reset money
+		agent.setMoney(agent_money);
 		int buy = 0;
 		int sell = 0;
 		
 		
 		agent.setAlpha(0.2);
 		agent.setEpsilon(0.2);
-		agent.setDiscount(0.02);
+		agent.setDiscount(0.2);
 		
 		OpenFile.Qtaulu.setRowCount(0);
 		
@@ -407,6 +416,8 @@ public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> st
 		int old_momemtum =0;
 		double price = 0;
 		double pe_val = 0;
+		int temp=0;
+		
 		
 		double old_price = 0;
 		double old_pe_val = 0;
@@ -417,13 +428,29 @@ public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> st
 		
 		for (int i = 0; i < stockvalues.size(); i++) {
 			String ai_action = "None";
+			temp++;
 			//agent.setMoney(agent.getMoney() + 100);
 			if(old_price == 0) {
-				old_price = stockvalues.get(i).getShare_price();
+				old_price = stockvalues.get(i).getAdjusted_price();
 			}
 			current_stock = stockvalues.get(i);
-			price = stockvalues.get(i).getShare_price();
-			momentum = (int) ((price/old_price)*100);			
+			price = stockvalues.get(i).getAdjusted_price();
+			if (i == 0 ){
+				momentum = 0;
+				stockvalues.get(i).setCommon_value(stockvalues.get(0).getAdjusted_price());
+			} else if (temp < 6) {
+				momentum = (int) ((price/old_price)*100);
+				
+
+				
+			} else {
+				momentum = (int) ((price/stockvalues.get(i-5).getAdjusted_price())*100);
+			}
+			
+			double result = (stockvalues.get(i).getAdjusted_price()/stockvalues.get(0).getAdjusted_price());
+			stockvalues.get(i).setCommon_value(result);
+			
+
 			current_stock.setMomentum(momentum);			
 			oldState = agent.getStockState(current_stock, old_stock);
 			action = agent.getStockAction(oldState);
@@ -434,30 +461,36 @@ public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> st
 			
 			if (old_momemtum < momentum){
 				isWin = false;				
-				reward = old_momemtum-momentum;
+				reward = old_momemtum-momentum-5;
 				agent.updateStock(oldState, action, newState, reward);
 			} else {
 				isWin = true;				
-				reward = old_momemtum-momentum;				
+				reward = old_momemtum-momentum+15;				
 				agent.updateStock(oldState, action, newState, reward);
 			}
 			
 			int how_many_to_sell = 0;
 			
-			if (action == 2) { // Sell
-				if(momentum +3 >= old_momemtum && stockvalues.get(i).getShare_price() > old_price){
+			if (action == 2 && temp > 5) { // Sell
+				
+				if(momentum +5 >= old_momemtum && stockvalues.get(i).getAdjusted_price() > old_price){
 					how_many_to_sell = (int) (agent.getStockCount() * 0.5);
 					sell++;
 					ai_action ="Sell";
 				}
+				else if(momentum +3 >= old_momemtum && stockvalues.get(i).getAdjusted_price() > old_price){
+					how_many_to_sell = (int) (agent.getStockCount() * 0.2);
+					sell++;
+					ai_action ="Sell";
+				}
 				
-				else if (stockvalues.get(i).getShare_price() > old_price){
+				else if (stockvalues.get(i).getAdjusted_price() > old_price){
 					how_many_to_sell = (int) (agent.getStockCount() * 0.1);
 					sell++;
 					ai_action ="Sell";
 				}
 				
-				double money_from_selling = agent.sellStocks(how_many_to_sell, stockvalues.get(i).getShare_price());
+				double money_from_selling = agent.sellStocks(how_many_to_sell, stockvalues.get(i).getAdjusted_price());
 				agent.setMoney(agent.getMoney()+money_from_selling);
 				agent.setStockCount(agent.getStockCount() - how_many_to_sell);
 				
@@ -465,40 +498,44 @@ public static void tryWithMoneyStockStuff(SkynetStockAgent agent, List<Stock> st
 			
 			double usable_money = 0;
 			
-			if (action == 1) {// buy stocks 
-				if(old_momemtum >= momentum-3 && stockvalues.get(i).getShare_price() < old_price){
+			if (action == 1 && temp > 5) {// buy stocks 
+				if(old_momemtum >= momentum-7 && stockvalues.get(i).getAdjusted_price() < old_price){
 					usable_money = agent.getMoney() * 0.5;
 					buy++;
 					ai_action = "Buy";
 
-				} else if (stockvalues.get(i).getShare_price() < old_price) {
+				} else if (old_momemtum >= momentum-5 && stockvalues.get(i).getAdjusted_price() < old_price){
+					usable_money = agent.getMoney() * 0.3;
+					buy++;
+					ai_action = "Buy";
+								
+				} else if (stockvalues.get(i).getAdjusted_price() < old_price) {
 					usable_money = agent.getMoney() * 0.1;
 					buy++;
 					ai_action = "Buy";
 				}
 				
-				int ammount_to_buy = agent.buyStocks(usable_money,stockvalues.get(i).getShare_price());
+				int ammount_to_buy = agent.buyStocks(usable_money,stockvalues.get(i).getAdjusted_price());
 				agent.setStockCount(agent.getStockCount() + ammount_to_buy);
-				double purchase_value = ammount_to_buy * stockvalues.get(i).getShare_price();		
+				double purchase_value = ammount_to_buy * stockvalues.get(i).getAdjusted_price();		
 				agent.setMoney(agent.getMoney()-purchase_value);
 				
 			}
-						
 			
 			agent.info.add(old_price + "#" + old_pe_val + "#" + price + "#" +pe_val + "#" + isWin + "#" + agent.getName());
-			double current_networth = agent.getMoney() + (stockvalues.get(i).getShare_price()) * agent.getStockCount();
-			OpenFile.addQLine(Arrays.toString(newState), df.format(agent.getQval()) , old_price,old_pe_val,price,pe_val, agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount(), df.format(current_networth));
+			double current_networth = agent.getMoney() + (stockvalues.get(i).getAdjusted_price()) * agent.getStockCount();
+			OpenFile.addQLine(Arrays.toString(newState), df.format(agent.getQval()) , old_price,price, agent.getName(), momentum, ai_action, df.format(agent.getMoney()), agent.getStockCount(), df.format(current_networth), df.format(stockvalues.get(i).getCommon_value()));
 			old_pe_val = stockvalues.get(i).getPe_value();
-			old_price = stockvalues.get(i).getShare_price();
+			old_price = stockvalues.get(i).getAdjusted_price();
 			old_stock = stockvalues.get(i);
 			old_stock.setMomentum(momentum);
 			old_momemtum = (int) ((price/old_price)*100);
 			
 		}
-		double nw = agent.getMoney() + (stockvalues.get(stockvalues.size()-1).getShare_price()) * agent.getStockCount();
+		double nw = agent.getMoney() + (stockvalues.get(stockvalues.size()-1).getAdjusted_price()) * agent.getStockCount();
 		OpenFile.addLine("Agent Money: " + df.format(agent.getMoney()) + "€");
 		OpenFile.addLine("Agent stock count: " + agent.getStockCount());
-		OpenFile.addLine("Agent stock worth: " + df.format((stockvalues.get(stockvalues.size()-1).getShare_price()) * agent.getStockCount()) + "€");
+		OpenFile.addLine("Agent stock worth: " + df.format((stockvalues.get(stockvalues.size()-1).getAdjusted_price()) * agent.getStockCount()) + "€");
 		OpenFile.addLine("Agent networth: " + df.format(nw) + "€");
 		OpenFile.addLine("Profit or loss: " + df.format(nw - starting_money) + "€");
 		OpenFile.addLine("Buy events: " + buy);

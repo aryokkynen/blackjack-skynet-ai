@@ -33,6 +33,8 @@ public class SkynetStockAgent {
 			"CURRENT STOCK PRIZE", "CURRENT P/E", "BUY/SELL", "SKYNET HANDLE" };
 	double qval = 0;
 
+	Random r = new Random();
+
 	public SkynetStockAgent(double e, double d, double a, String name, double m) {
 		this.name = name;
 		this.epsilon = e;
@@ -50,17 +52,17 @@ public class SkynetStockAgent {
 		double[] state = new double[4];
 
 		try {
-			double cp = current.getShare_price();
+			double cp = current.getCommon_value();
 			double cm = current.getMomentum();
-			double op = old.getShare_price();
+			double op = old.getCommon_value();
 			double om = old.getMomentum();
 			state[0] = Precision.round(cp, 1);
 			state[1] = cm;
 			state[2] = Precision.round(op, 1);
 			state[3] = om;
 		} catch (Exception e) {
-			state[2] = 8.37;
-			state[3] = 100;
+			state[2] = 0;
+			state[3] = 0;
 		}
 
 		return state;
@@ -70,12 +72,14 @@ public class SkynetStockAgent {
 		double[] legalActions = this.getLegalStockActions(state);
 
 		// get next next boolean value
-		if (Math.random() > this.epsilon) {
+		double temp = Math.random();
+		if (temp > this.epsilon) {
 			Random randomG = new Random();
-			int index = randomG.nextInt(2);
+			int index = randomG.nextInt(3);
 			int action = (int) legalActions[index];
 			return action;
 		}
+
 		return this.getStockPolicy(state);
 	}
 
@@ -110,13 +114,16 @@ public class SkynetStockAgent {
 		double actionValue = 0;
 		double[] legalActions = this.getLegalStockActions(state);
 		for (int i = 0; i < 3; i++) {
-			actionValue = this.getStockQValue(state, legalActions[i]);
+			// actionValue = this.getStockQValue(state, legalActions[i]);
+			// System.out.println(actionValue);
 			if (maxValue < actionValue) {
+
 				maxValue = actionValue;
 				maxAction = legalActions[i];
+
 			}
 		}
-		
+
 		return maxAction;
 	}
 
@@ -132,9 +139,9 @@ public class SkynetStockAgent {
 			if (maxValue < actionValue) {
 				maxValue = actionValue;
 				maxAction = legalActions[i];
+
 			}
 		}
-		
 
 		return maxValue;
 	}
@@ -225,7 +232,7 @@ public class SkynetStockAgent {
 				String date = asdf[0];
 				double price = Double.parseDouble(asdf[1]);
 				double pe_value = Double.parseDouble(asdf[2]);
-				Stock s = new Stock(date, price, pe_value, 0);
+				Stock s = new Stock(date, price, 0, pe_value, 0,0);
 				stockList.add(s);
 
 			}

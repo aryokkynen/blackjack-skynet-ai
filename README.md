@@ -14,10 +14,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 # Purpose of this project
 
+AI Technology for this project is Reinforcement Learning/Qlearning.  
 First versions of project was concentrated making AI to play blackjack. We achieved around 34-35% win rate for blackjack.  
-AI Technology for this project is Reinforcement Learning/Qlearning.
-After that, project took new turn and we are now trying to use AI to make/help/support to make decisions for financial decisision.
-
+After blackjack, project took new turn and we are now trying to use AI to predict/see if it can make intelligent decisions for stock market.
 
 # Usage
 
@@ -43,6 +42,7 @@ Bot creation: SkynetStockAgent hal = new SkynetStockAgent(epsilon, discount, alp
 * Epsilon = Greedy Policy to allow the agent to occasionally not to take the optimal action according to its experience.
 * Discount = Gamma, this models the fact that future rewards are worth less than immediate rewards
 * Alpha = Learning rate, set between 0 and 1. Setting it to 0 means that the Q-values are never updated, hence nothing is learned. Setting a high value such as 0.9 means that learning can occur quickly.
+* Agent money = Starting capital for AI Agent
 
 # Requirements
  

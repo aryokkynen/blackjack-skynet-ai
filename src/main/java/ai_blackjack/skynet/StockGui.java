@@ -4,6 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -157,20 +161,15 @@ public class StockGui {
 
 			}
 		});
-
-		/*
-		 * //JButton btnDoStuffAnd = new JButton("Do stuff and save");
-		 * btnDoStuffAnd.setEnabled(false);
-		 * splitPane.setRightComponent(btnDoStuffAnd);
-		 * 
-		 * 
-		 * btnDoStuffAnd.addActionListener(new ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) {
-		 * System.out.println("lööl");
-		 * 
-		 * } });
-		 */
+		// Create empty default folder for data
+		 Path path = Paths.get("./data");
+	        if (!Files.exists(path)) {
+	            try {
+	                Files.createDirectories(path);	              
+	            } catch (IOException e) {	            	
+	                e.printStackTrace();
+	            }
+	        }
 	}
 
 }

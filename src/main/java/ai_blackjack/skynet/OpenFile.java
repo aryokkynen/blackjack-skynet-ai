@@ -19,7 +19,10 @@ public class OpenFile {
 
 	public void FilePicker(DefaultTableModel model, DefaultTableModel model2, DefaultTableModel model3,
 			boolean training) throws Exception {
-		filechooser.setCurrentDirectory(new java.io.File("./data"));
+	        
+	        filechooser.setCurrentDirectory(new java.io.File("./data"));
+	        
+		
 		if (filechooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			Taulu = model2;
 			Qtaulu = model3;

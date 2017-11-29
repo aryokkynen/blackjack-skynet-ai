@@ -33,12 +33,16 @@ Example
 date,close,adjclose  
 2000-01-03,7.23256254196167,4.525106430053711  
 
+or look at example.csv for proper data format.
+
 You can train AI with multiple different stocks, we are suggesting you use different stocks to train and for 'real' simulation stock you want to get results in.
 
 You can change from code what value AI uses (current closing price or adjusted closing price).
 
 Bot creation: SkynetStockAgent hal = new SkynetStockAgent(epsilon, discount, alpha, "HAL 9000", agent_money);
-* Epsilon = 
+* Epsilon = Greedy Policy to allow the agent to occasionally not to take the optimal action according to its experience.
+* Discount = Gamma, this models the fact that future rewards are worth less than immediate rewards
+* Alpha = Learning rate, set between 0 and 1. Setting it to 0 means that the Q-values are never updated, hence nothing is learned. Setting a high value such as 0.9 means that learning can occur quickly.
 
 # Requirements
  

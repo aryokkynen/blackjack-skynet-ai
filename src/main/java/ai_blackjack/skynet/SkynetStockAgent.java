@@ -114,13 +114,11 @@ public class SkynetStockAgent {
 		double actionValue = 0;
 		double[] legalActions = this.getLegalStockActions(state);
 		for (int i = 0; i < 3; i++) {
-			// actionValue = this.getStockQValue(state, legalActions[i]);
-			// System.out.println(actionValue);
-			if (maxValue < actionValue) {
+			actionValue = this.getStockQValue(state, legalActions[i]);
 
+			if (maxValue < actionValue) {
 				maxValue = actionValue;
 				maxAction = legalActions[i];
-
 			}
 		}
 
@@ -136,10 +134,10 @@ public class SkynetStockAgent {
 		double[] legalActions = this.getLegalStockActions(state);
 		for (int i = 0; i < 3; i++) {
 			actionValue = this.getStockQValue(state, legalActions[i]);
+			
 			if (maxValue < actionValue) {
 				maxValue = actionValue;
 				maxAction = legalActions[i];
-
 			}
 		}
 
@@ -232,7 +230,7 @@ public class SkynetStockAgent {
 				String date = asdf[0];
 				double price = Double.parseDouble(asdf[1]);
 				double pe_value = Double.parseDouble(asdf[2]);
-				Stock s = new Stock(date, price, 0, pe_value, 0,0);
+				Stock s = new Stock(date, price, 0, pe_value, 0, 0);
 				stockList.add(s);
 
 			}

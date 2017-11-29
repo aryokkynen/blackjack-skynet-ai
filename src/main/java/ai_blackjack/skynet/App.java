@@ -96,9 +96,6 @@ public class App {
 			trainStockStuff(hal, stockvalues);
 		}
 		if (!training) {
-			hal.setAlpha(Math.random());
-			hal.setDiscount(Math.random());
-			hal.setEpsilon(Math.random());
 			tryWithMoneyStockStuff(hal, stockvalues);
 		}
 
@@ -188,9 +185,6 @@ public class App {
 				reward = -1;
 			}
 
-			// agent.info.add(player_hand_count + "#" + player_hand_value + "#"
-			// + dealer_hand_count + "#" +dealer_hand_value + "#" + isWin + "#"
-			// + agent.getName());
 			agent.update(oldState, action, agent.getState(), reward);
 			games += 1;
 
@@ -243,25 +237,17 @@ public class App {
 				player_wins++;
 				if (agent.dealer.getPlayerValue() == 21 && agent.dealer.getPlayerHand().size() == 2) {
 					agent.setMoney(agent.money = agent.money + bet * 5);
-					// System.out.println("Jackpot with two cards, won: "+
-					// (bet*5));
-
-				}
-
-				else if (agent.dealer.getPlayerValue() == 21) {
+				} else if (agent.dealer.getPlayerValue() == 21) {
 					agent.setMoney(agent.money = (agent.money + bet * 3.5));
-					// System.out.println("Jackpot, won: "+ bet*3.5);
-
 				} else {
-					agent.setMoney(agent.money = (agent.money + bet * 2));
-					// System.out.println("Won: "+ (bet*2));
+					agent.setMoney(agent.money = (agent.money + bet * 2));	
 				}
 
 			} else {
 				reward = -1;
 				dealer_wins++;
 			}
-			// System.out.println("Agent money: " + agent.money);
+			
 			int dealer_hand_count = agent.dealer.dealerHand.size();
 			int player_hand_count = agent.dealer.playerHand.size();
 			int dealer_hand_value = agent.dealer.getDealerValue();
@@ -321,10 +307,10 @@ public class App {
 			agent.setDiscount(Math.random());
 			agent.setEpsilon(Math.random());
 
-			// agent.setMoney(agent.getMoney() + 100);
 			if (old_price == 0) {
 				old_price = stockvalues.get(i).getAdjusted_price();
 			}
+			
 			current_stock = stockvalues.get(i);
 			price = stockvalues.get(i).getAdjusted_price();
 			momentum = (int) ((price / old_price) * 100);
@@ -402,7 +388,6 @@ public class App {
 			String ai_action = "None";
 			temp++;
 
-			// agent.setMoney(agent.getMoney() + 100);
 			if (old_price == 0) {
 				old_price = stockvalues.get(i).getAdjusted_price();
 				old_common_value = stockvalues.get(i).getCommon_value();

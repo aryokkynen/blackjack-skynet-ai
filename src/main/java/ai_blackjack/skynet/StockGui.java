@@ -161,14 +161,14 @@ public class StockGui {
 			}
 		});
 		// Create empty default folder for data
-		 Path path = Paths.get("./data");
-	        if (!Files.exists(path)) {
-	            try {
-	                Files.createDirectories(path);	              
-	            } catch (IOException e) {	            	
-	                e.printStackTrace();
-	            }
-	        }
+		Path path = Paths.get("./data");
+		if (!Files.exists(path)) {
+			try {
+				Files.createDirectories(path);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

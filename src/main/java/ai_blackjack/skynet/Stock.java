@@ -9,7 +9,8 @@ public class Stock {
 	int momentum;
 	double common_value;
 
-	public Stock(String date, double share_price, double adjusted_price, double pe_value, int momentum, double common_value) {
+	public Stock(String date, double share_price, double adjusted_price, double pe_value, int momentum,
+			double common_value) {
 		super();
 		this.date = date;
 		this.share_price = share_price;
@@ -18,8 +19,6 @@ public class Stock {
 		this.momentum = momentum;
 		this.common_value = common_value;
 	}
-
-
 
 	public Stock() {
 		super();
@@ -57,7 +56,7 @@ public class Stock {
 	public void setMomentum(int momentum) {
 		this.momentum = momentum;
 	}
-	
+
 	public double getAdjusted_price() {
 		return adjusted_price;
 	}
@@ -65,7 +64,7 @@ public class Stock {
 	public void setAdjusted_price(double adjusted_price) {
 		this.adjusted_price = adjusted_price;
 	}
-	
+
 	public double getCommon_value() {
 		return common_value;
 	}

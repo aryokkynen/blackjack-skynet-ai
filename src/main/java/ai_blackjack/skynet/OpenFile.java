@@ -19,10 +19,9 @@ public class OpenFile {
 
 	public void FilePicker(DefaultTableModel model, DefaultTableModel model2, DefaultTableModel model3,
 			boolean training) throws Exception {
-	        
-	        filechooser.setCurrentDirectory(new java.io.File("./data"));
-	        
-		
+
+		filechooser.setCurrentDirectory(new java.io.File("./data"));
+
 		if (filechooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			Taulu = model2;
 			Qtaulu = model3;
@@ -44,7 +43,7 @@ public class OpenFile {
 				String date = asdf[0];
 				double price = Double.parseDouble(asdf[1]);
 				double adjusted_price = Double.parseDouble(asdf[2]);
-				Stock s = new Stock(date, price, adjusted_price, 0, 0,0);
+				Stock s = new Stock(date, price, adjusted_price, 0, 0, 0);
 				model.addRow(new Object[] { date, price, adjusted_price });
 				stockList.add(s);
 
@@ -78,7 +77,7 @@ public class OpenFile {
 				String date = asdf[0];
 				double price = Double.parseDouble(asdf[1]);
 				double adjusted_price = Double.parseDouble(asdf[2]);
-		
+
 				Stock s = new Stock(date, price, adjusted_price, 0, 0, 0);
 
 				stockList.add(s);

@@ -155,7 +155,6 @@ public class StockGui {
 				try {
 					openfile.Trainer(model2, training);
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 

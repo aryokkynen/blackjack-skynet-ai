@@ -2,7 +2,7 @@
 
 Project is loosely based on XinHuang123's blackjack AI [XinHuang123 Github](https://github.com/XinHuang123/BlackJack-with-Artificial-Intelligence)
 
-# Lisence
+# License
 
 Copyright 2017 Leif Salminen / Eero Salomies / Antti Ryökkynen / Mokhtar Paukkio / Niko Pieviläinen
 
@@ -24,9 +24,9 @@ First you need some stock market data, suggested to use Yahoo finance for csv do
 Data must be in following format
 * Header row: date,close,adjclose
 
-* Date = String for dates
-* close = Stock closing price (format 0.0)
-* Adjusted closing price = Stock adjusted closing price, if using data from longer perioid automatically calculates possible splits and dividends in price. Yahoo Finance offer this information. (format 0.0)
+* Date = {string}
+* close = {double} | Use format 0.0
+* Adjusted closing price = {double} |Stock adjusted closing price, if using data from longer perioid automatically calculates possible splits and dividends in price. Yahoo Finance offer this information | Use format 0.0
 
 Example  
 date,close,adjclose  
@@ -64,6 +64,9 @@ Yahoo Finance for csv data : [Yahoo Finance](https://finance.yahoo.com/)
 * Proper data saving from GUI
 * Ability to clear all data and start over (Now you need to restart program for that)
 * Easy way to follow what AI does
+* Code refactoring
+* Unit tests
+* Changeable settings from GUI
 
 # Team
 

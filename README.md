@@ -67,6 +67,7 @@ Yahoo Finance for csv data : [Yahoo Finance](https://finance.yahoo.com/)
 * Code refactoring
 * Unit tests
 * Changeable settings from GUI
+* Better exception handling
 
 # Team
 
